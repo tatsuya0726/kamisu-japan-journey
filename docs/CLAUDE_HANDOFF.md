@@ -4,9 +4,9 @@
 
 This is an in-progress redesign on `feat/kamisu-defense-sample`, not a released tower-defense game. The public URL remains https://tatsuya0726.github.io/kamisu-japan-journey/ and currently serves the previous journey game from `main`. Never create a replacement repository or change that URL. The previous released commit is `2e742d5a74c6959453e84fa6b9b6cba1483662c8`; the local preservation tag is `journey-v0.2-preserved`.
 
-Codex currently owns **tower-defense rules/rendering/UI plus integration of the supplied cat comparison**. Work from a separate clone or worktree and branch from this handoff commit. Do not reset, clean, checkout over, rebase, or overwrite the active checkout or any uncommitted work. Do not modify or terminate unrelated Unity/Blender work. Open a PR against this working branch for review; do not merge or deploy automatically. A push to `main` triggers production Pages deployment.
+Codex's completed handoff scope is **tower-defense rules/rendering/UI plus the receiving scaffold for the supplied cat comparison**. This branch is now parked for handoff; image integration is blocked and Codex is not continuing edits after this handoff. Before any agent resumes, agree on a single integration owner. Work from a separate clone or worktree and branch from this handoff commit. Do not reset, clean, checkout over, rebase, or overwrite the active checkout or any uncommitted work. Do not modify or terminate unrelated Unity/Blender work. Open a PR against this working branch for review; do not merge or deploy automatically. A push to `main` triggers production Pages deployment.
 
-Suggested independent Claude scope: review `tests/defense.test.ts` and propose balancing/test additions in a PR. Coordinate before editing `src/td.ts`, `src/defense.ts`, `src/sample.ts`, `src/td.css`, `sample.html`, `index.html`, or the new image directory, since Codex is actively integrating these files. Avoid parallel asset replacement. Record assumptions and validation in the PR.
+Suggested independent Claude scope: review `tests/defense.test.ts` and propose balancing/test additions in a PR. Coordinate before editing `src/td.ts`, `src/defense.ts`, `src/sample.ts`, `src/td.css`, `sample.html`, `index.html`, or the new image directory, especially if Codex has resumed integration. Avoid parallel asset replacement. Record assumptions and validation in the PR.
 
 ## User's intended game
 
@@ -68,6 +68,22 @@ Actual Chrome verification so far: title and stage selector, generated atlas, sh
 The parent task has generated two alternatives from the user's supplied cat photo. The hidden body/legs were generated to make a full-body right-facing unit. Source PNG sizes reported by the parent: photo **1,737,390 bytes**, pixel **1,125,286 bytes**, both 1254×1254 with alpha. These are source sizes, NOT verified local files or optimized delivery sizes. Do not claim they are installed or measured here yet.
 
 The formal Library-to-Windows transfer currently fails while applying extended attributes (`os.setxattr` unsupported on Windows). The local consumer must resolve this through a supported transfer path; do not strip metadata, alter the official helper, infer download URLs, or copy secrets into the repository. Private Library IDs and transfer credentials deliberately are not in this repository. Parent task has the identities.
+
+## Manual PNG receiving folder
+
+The user may manually save the two provided PNG downloads into this folder **relative to the repository root**:
+
+```text
+.local-assets/cat-sample/originals/
+  cat-photo-sample.png
+  cat-pixel-sample.png
+```
+
+The folder is created in the current local checkout and `.local-assets/` is Git-ignored. It is outside `public/` and therefore outside the default deployment. A fresh clone must create it locally. Use the actual PNG downloads, not screenshots or JPEG conversions. The expected source characteristics reported by the parent are 1254 by 1254 pixels, RGBA transparency, right-facing cream long-haired cat; the photo image has generated body/legs, while the pixel image is derived from that pose. Local receipt, transparency, dimensions and exact bytes are still unverified. Keep the files unchanged as originals.
+
+This is an explicit user-performed local-file handoff, not a workaround for the failed Library helper. Do not automatically download or strip Library metadata. Once the user confirms the local files are saved, inspect those named files, record provenance and byte counts locally, and use them as the user-supplied local inputs. Do not search the rest of the PC for substitutes.
+
+For an immediate preview, run `npm run dev`, open `/sample.html`, and use the two matching file pickers to select these exact files. The current preview has **no automatic file loading**. It displays selected files only in that browser tab and does not upload or persist them. Runtime integration and image optimization still require the next steps below. Planned optimized output names are `public/defense/sample-photo.webp` and `public/defense/sample-pixel.png`; these files do not exist yet and their formats/sizes must be validated before references are added.
 
 ## Next work, in order
 

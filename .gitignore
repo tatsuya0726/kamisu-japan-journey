@@ -8,3 +8,4 @@ size-report.json
 scripts/kamisu-update.cjs
 *.local
 .env*
+.local-assets/

@@ -1,3 +1,5 @@
+> Updated status: see [PLAYABLE-CANDIDATE.md](PLAYABLE-CANDIDATE.md). This older handoff is retained as historical context.
+
 # Claude handoff — 神栖をまもれ！！
 
 ## Status and ownership

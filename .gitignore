@@ -1,0 +1,10 @@
+node_modules/
+dist/
+*.log
+Captures/
+COMPARISON.md
+VALIDATION.md
+size-report.json
+scripts/kamisu-update.cjs
+*.local
+.env*

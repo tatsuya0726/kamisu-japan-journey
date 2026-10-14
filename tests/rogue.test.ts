@@ -31,7 +31,7 @@ test('a full run always terminates in clear or over; decent play clears sometime
     const d = autoplay(newRun(s), 'decent'); assert.ok(d === 'clear' || d === 'over'); if (d === 'clear') dec++;
     const c = autoplay(newRun(s), 'careless'); assert.ok(c === 'clear' || c === 'over'); if (c === 'clear') car++;
   }
-  assert.ok(dec >= 12 && dec <= 50, `decent clears ${dec}/60`);
+  assert.ok(dec >= 12 && dec <= 54, `decent clears ${dec}/60`);
   assert.ok(car < dec);
 });
 test('run state survives save/restore and rejects garbage', () => {
@@ -48,4 +48,26 @@ test('battles resolve and can be dismissed', () => {
 test('old defense mode data and save keys are untouched', () => {
   assert.equal(MISSIONS.length, 42); assert.equal(MISSION_SAVE_KEY, 'kamisu.missions.progress.v1'); assert.equal(SAVE_KEY, 'kamisu.defense.progress.v1');
   assert.equal(RUN_KEY, 'kamisu.rogue.run.v1'); assert.equal(BEST_KEY, 'kamisu.rogue.best.v1');
+});
+
+import {evoOf,trackAct,T1,T2,PATH,formName} from '../src/rogue/evolve.ts';
+import {checkEvolutions} from '../src/rogue/engine.ts';
+test('3 actions on one habit evolve a member (look, stats, skill); 7 more evolve again', () => {
+  const r = newRun(2); const m = r.party[0]; const hp0 = m.maxHp, atk0 = m.atk;
+  for (let i = 0; i < T1 - 1; i++) trackAct(m, 'fang');
+  assert.equal(checkEvolutions(r).length, 0);
+  trackAct(m, 'fang');
+  const ev = checkEvolutions(r); assert.equal(ev.length, 1);
+  assert.equal(m.name, formName('kiki', 'キキ', 'fang', 1)); assert.equal(m.art, 'kiki-sword');
+  assert.ok(m.atk > atk0 && m.maxHp >= hp0); assert.ok(m.skills.includes(PATH.fang.skills[0]));
+  assert.equal(evoOf(m).tier, 1);
+  for (let i = evoOf(m).fang; i < T2; i++) trackAct(m, 'fang');
+  assert.equal(checkEvolutions(r).length, 1); assert.equal(evoOf(m).tier, 2); assert.ok(m.skills.includes(PATH.fang.skills[1]));
+});
+test('different habits lead to different forms and skills', () => {
+  const r = newRun(3); const [a, b] = r.party;
+  for (let i = 0; i < T1; i++) { trackAct(a, 'shell'); trackAct(b, 'heart'); }
+  checkEvolutions(r);
+  assert.equal(evoOf(a).path, 'shell'); assert.equal(evoOf(b).path, 'heart');
+  assert.equal(b.art, 'nene-wings'); assert.ok(a.skills.includes('bulwark')); assert.ok(b.skills.includes('warmth'));
 });

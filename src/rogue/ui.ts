@@ -1,11 +1,12 @@
 /** DOM screens for the turn-based roguelike run: map, battle (FF-style command windows), events, shop, rewards. */
-import {newRun,visit,startBoss,chooseEvent,finishEvent,rest,buy,leaveShop,useItem,takeReward,resolveRound,dismissBattle,living,DAYS,CHAPTERS,xpNeed,type RunState,type Cmd,type Ev,type Foe,type Ref} from './engine.ts';
+import {newRun,visit,startBoss,chooseEvent,finishEvent,rest,buy,leaveShop,useItem,takeReward,resolveRound,dismissBattle,living,DAYS,CHAPTERS,xpNeed,type RunState,type Member,type Cmd,type Ev,type Foe,type Ref} from './engine.ts';
 import {SKILLS,ITEMS,PERKS,EVENTS,MEMBERS,BOSSES,BOSS_BG,BOSS_PLACE,PLACE_BG} from './data.ts';
 import {saveRun,clearRun,loadRun,recordResult,loadBest} from './save.ts';
 import {LANDMARKS} from '../local-walk.ts';
 import {PLACE_LOCATIONS,MISSION_LOCATIONS} from '../mission-locations.ts';
 import {APPROVED_ART,artURL} from '../defense-assets.ts';
 import {faceHTML} from '../dialogue.ts';
+import {evoOf,PATH,TRACKS,T1,T2,formName,type Track,type EvoEvent} from './evolve.ts';
 
 export type RogueHooks={sfx:(k:'attack'|'win'|'lose'|'spawn'|'base')=>void;exit:()=>void};
 type Menu='main'|'skill'|'item'|'foe'|'ally';
@@ -17,20 +18,23 @@ const pct=(a:number,b:number)=>Math.max(0,Math.min(100,Math.round(100*a/Math.max
 const img=(key:string,cls='')=>`<img class="${cls}" alt="" decoding="async" src="${artURL(key)}">`;
 
 let root:HTMLElement,run:RunState,hooks:RogueHooks;
-const ui={sel:-1,sheet:'' as ''|'items'|'quit'|'itemTarget',sheetItem:'',menu:'main' as Menu,cur:0,cmds:[] as (Cmd|undefined)[],pending:null as null|{t:'attack'}|{t:'skill';skill:string}|{t:'item';item:string},busy:false,fast:false,log:[] as string[],toast:'',vis:null as Vis|null,result:false};
+const ui={sel:-1,sheet:'' as ''|'items'|'quit'|'itemTarget'|'member',sheetI:0,evo:null as null|{list:EvoEvent[];idx:number},evoSeen:false,sheetItem:'',menu:'main' as Menu,cur:0,cmds:[] as (Cmd|undefined)[],pending:null as null|{t:'attack'}|{t:'skill';skill:string}|{t:'item';item:string},busy:false,fast:false,log:[] as string[],toast:'',vis:null as Vis|null,result:false};
 const save=()=>{if(run.phase==='over'||run.phase==='clear')clearRun();else saveRun(run);};
 
 export function openRogue(h:RogueHooks,resume:boolean){hooks=h;
- let el=document.getElementById('rogue');if(!el){el=document.createElement('div');el.id='rogue';el.className='rg';document.body.append(el);el.addEventListener('click',onClick);}
+ let el=document.getElementById('rogue');if(!el){el=document.createElement('div');el.id='rogue';el.className='rg';document.body.append(el);el.addEventListener('click',onClick);new ResizeObserver(()=>layoutMap()).observe(el);}
  root=el;root.hidden=false;document.documentElement.classList.add('rogue-open');
- const saved=resume?loadRun():null;run=saved??newRun();Object.assign(ui,{sel:-1,sheet:'',menu:'main',cur:0,cmds:[],pending:null,busy:false,log:[],toast:'',vis:null,result:false});
+ const saved=resume?loadRun():null;run=saved??newRun();Object.assign(ui,{evo:null,evoSeen:false,sel:-1,sheet:'',menu:'main',cur:0,cmds:[],pending:null,busy:false,log:[],toast:'',vis:null,result:false});
  if(!saved){clearRun();ui.toast='遠征のはじまり！ 7日ごとにボスが待っている。';}
  save();render();}
 export function closeRogue(){if(root)root.hidden=true;document.documentElement.classList.remove('rogue-open');}
 
 // ---------- shared pieces ----------
 const bar=(a:number,b:number,cls='')=>`<i class="rg-bar ${cls}"><b style="width:${pct(a,b)}%"></b></i>`;
-function partyCards(compact=false){return `<div class="rg-cards ${compact?'compact':''}">${run.party.map((m,i)=>`<button class="rg-card ${m.hp<=0?'ko':''}" data-rg="member" data-i="${i}" aria-label="${m.name} レベル${m.level} HP${m.hp}/${m.maxHp}">${img(m.art,'rg-face')}<span class="rg-nm">${m.name}<small>Lv${m.level}</small></span>${bar(m.hp,m.maxHp)}<span class="rg-num">HP ${m.hp}/${m.maxHp}</span><span class="rg-num mp">気力 ${m.mp}/${m.maxMp}</span></button>`).join('')}</div>`;}
+const evoCls=(m:Member)=>{const e=m.evo;return e&&e.tier?`evo evo-${e.path} t${e.tier}`:'';};
+const evMini=(m:Member)=>{const e=evoOf(m);return e.tier?`<span class="rg-ev" style="color:${PATH[e.path as Track].color}">${'★'.repeat(e.tier)}${PATH[e.path as Track].mark}</span>`:`<span class="rg-ev">${TRACKS.map(t=>`${PATH[t].mark}${e[t]}`).join(' ')}</span>`;};
+function partyCards(compact=false){return `<div class="rg-cards ${compact?'compact':''}">${run.party.map((m,i)=>`<button class="rg-card ${m.hp<=0?'ko':''}" data-rg="member" data-i="${i}" aria-label="${m.name} レベル${m.level} HP${m.hp}/${m.maxHp} 詳細">${img(m.art,'rg-face '+evoCls(m))}<span class="rg-nm">${m.name}<small>Lv${m.level}</small></span>${bar(m.hp,m.maxHp)}<span class="rg-num">HP ${m.hp}/${m.maxHp}　気力 ${m.mp}/${m.maxMp}</span>${evMini(m)}</button>`).join('')}</div>`;}
+const chips=()=>`<div class="rg-chips">${run.party.map((m,i)=>`<button class="rg-chip ${m.hp<=0?'ko':''}" data-rg="member" data-i="${i}" aria-label="${m.name} 詳細">${img(m.art,'rg-face '+evoCls(m))}<span><b>${m.name}</b>${bar(m.hp,m.maxHp)}<small>${m.hp}/${m.maxHp}</small></span></button>`).join('')}</div>`;
 const topbar=(extra='')=>`<header class="rg-top"><div class="rg-week"><span>第${run.chapter}週</span><b>${Math.min(run.day,DAYS)}日目</b><small>/ ${DAYS}日</small></div><ol class="rg-pips" aria-label="${DAYS}日のうち${Math.min(run.day,DAYS)}日目">${Array.from({length:DAYS},(_,i)=>`<li class="${i+1<run.day?'past':i+1===run.day?'now':''} ${i===DAYS-1?'boss':''}"></li>`).join('')}</ol><div class="rg-gold">かつおぶし <b>${run.gold}</b></div>${extra}</header>`;
 const scene=(bg:string,inner:string,cls='')=>`<div class="rg-scene ${cls}" style="background-image:linear-gradient(#0c223099,#0c2230d9),url('${artURL(bg)}')">${inner}</div>`;
 
@@ -43,18 +47,37 @@ function render(){if(!root||root.hidden)return;
  else if(run.phase==='shop')html=shopHTML();
  else if(run.phase==='reward')html=rewardHTML();
  else html=endHTML();
- root.innerHTML=html+sheetHTML();
+ root.innerHTML=html+sheetHTML()+evoHTML();layoutMap();
  const f=root.querySelector<HTMLElement>('[data-autofocus]');if(f&&!ui.busy)f.focus({preventScroll:true});}
 
 function mapHTML(){const bossDay=run.day>=DAYS,b=BOSSES[run.chapter-1],sel=run.nodes[ui.sel];
- const nodes=run.nodes.map((n,i)=>{const p=PLACE_LOCATIONS[i],k=KIND[n.kind];return `<button class="rg-node k-${n.kind} ${n.visited?'done':''} ${ui.sel===i?'sel':''}" style="left:${p.x}%;top:${p.y}%" data-rg="node" data-i="${i}" ${n.visited||bossDay?'disabled':''} aria-label="${LANDMARKS[i].name} ${k.n}${n.visited?' 訪問済み':''}" aria-pressed="${ui.sel===i}"><b>${n.visited?'✓':k.l}</b><span>${LANDMARKS[i].name}</span></button>`;}).join('');
+ const nodes=run.nodes.map((n,i)=>{const p=PLACE_LOCATIONS[i],k=KIND[n.kind];return `<button class="rg-node k-${n.kind} ${n.visited?'done':''} ${ui.sel===i?'sel':''}" data-x="${p.x}" data-y="${p.y}" data-rg="node" data-i="${i}" ${n.visited||bossDay?'disabled':''} aria-label="${LANDMARKS[i].name} ${k.n}${n.visited?' 訪問済み':''}" aria-pressed="${ui.sel===i}"><b>${n.visited?'✓':k.l}</b><span class="lab">${LANDMARKS[i].name}</span></button>`;}).join('');
  const bp=MISSION_LOCATIONS[run.chapter-1];
- const boss=`<button class="rg-node k-boss ${bossDay?'ready':''}" style="left:${bp.x}%;top:${bp.y}%" data-rg="${bossDay?'boss':'bossHint'}" aria-label="${BOSS_PLACE[run.chapter-1]} ボス ${b.name}"><b>${b.title==='ラスボス'?'王':'ボス'}</b><span>${BOSS_PLACE[run.chapter-1]}</span></button>`;
+ const boss=`<button class="rg-node k-boss ${bossDay?'ready':''}" data-x="${bp.x}" data-y="${bp.y}" data-rg="${bossDay?'boss':'bossHint'}" aria-label="${BOSS_PLACE[run.chapter-1]} ボス ${b.name}"><b>${b.title==='ラスボス'?'王':'ボス'}</b><span class="lab">${BOSS_PLACE[run.chapter-1]}</span></button>`;
  let info:string;
- if(bossDay)info=`<div class="rg-info">${toastEl()}<strong>${DAYS}日目 — ${b.title}「${b.name}」が待っている！</strong><span>準備ができたら向かおう。どうぐはここで使える。</span></div><button class="rg-go" data-rg="boss" data-autofocus>ボスにいどむ</button>`;
+ if(bossDay)info=`<div class="rg-info">${toastEl()}<strong>${DAYS}日目 — ${b.title}「${b.name}」が待っている！</strong><span>準備ができたら向かおう。</span></div><button class="rg-go" data-rg="boss" data-autofocus>ボスにいどむ</button>`;
  else if(sel){const k=KIND[sel.kind],foes=sel.foes.length?`<span>敵：${sel.foes.map(id=>nameOf(id)).join('・')}</span>`:`<span>${k.d}</span>`;info=`<div class="rg-info">${toastEl()}<strong>${LANDMARKS[ui.sel].name}：${k.n}</strong>${foes}</div><button class="rg-go" data-rg="go" data-autofocus>ここへ行く <small>(1日すすむ)</small></button>`;}
- else info=`<div class="rg-info">${toastEl()}<strong>行き先を選ぼう</strong><span>行動すると1日すすむ。${DAYS}日目にボスと戦う。丸の印で中身が分かる。</span></div>`;
- return `<div class="rg rg-mapscreen">${topbar(`<button class="rg-small" data-rg="items">どうぐ</button><button class="rg-small" data-rg="quit">やめる</button>`)}<div class="rg-body"><div class="rg-mapwrap"><div class="rg-mapart"><img src="${APPROVED_ART.map}" alt="神栖の地図">${nodes}${boss}</div></div><aside class="rg-side">${partyCards(true)}</aside></div><footer class="rg-foot">${info}</footer></div>`;}
+ else info=`<div class="rg-info">${toastEl()}<strong>行き先を選ぼう</strong><span>行動すると1日すすむ。${DAYS}日目にボス。行動のくせで仲間が進化する！</span></div>`;
+ return `<div class="rg rg-mapscreen">${topbar(`<button class="rg-small" data-rg="items">どうぐ</button><button class="rg-small" data-rg="quit">やめる</button>`)}<div class="rg-mapview" id="rg-mapview"><img class="rg-mapbg" alt="" src="${APPROVED_ART.map}"><img class="rg-mapimg" alt="神栖の地図" src="${APPROVED_ART.map}">${nodes}${boss}</div><footer class="rg-foot rg-mapfoot">${chips()}${info}</footer></div>`;}
+type R={x:number;y:number;w:number;h:number};
+const hit=(a:R,b:R)=>a.x<b.x+b.w&&b.x<a.x+a.w&&a.y<b.y+b.h&&b.y<a.y+a.h;
+/** Fit the illustrated map to the free area (cropping empty edges), then put every label where it covers no mark or other label. */
+function layoutMap(){const v=root?.querySelector<HTMLElement>('#rg-mapview');if(!v)return;const W=v.clientWidth,H=v.clientHeight;if(!W||!H)return;
+ const IW=1024,IH=683,ns=Array.from(v.querySelectorAll<HTMLElement>('.rg-node'));
+ const P=ns.map(n=>({x:+n.dataset.x!/100*IW,y:+n.dataset.y!/100*IH}));
+ const x0=Math.min(...P.map(p=>p.x)),x1=Math.max(...P.map(p=>p.x)),y0=Math.min(...P.map(p=>p.y)),y1=Math.max(...P.map(p=>p.y));
+ const mx=58,my=34,fit=Math.min((W-2*mx)/Math.max(40,x1-x0),(H-2*my)/Math.max(40,y1-y0));
+ const sCover=Math.max(W/IW,H/IH),sMin=Math.min(W/IW,H/IH),s=Math.max(sMin,Math.min(fit,sCover*1.3));
+ const iw=IW*s,ih=IH*s;let ox=W/2-(x0+x1)/2*s,oy=H/2-(y0+y1)/2*s;
+ ox=iw>=W?Math.min(0,Math.max(W-iw,ox)):(W-iw)/2;oy=ih>=H?Math.min(0,Math.max(H-ih,oy)):(H-ih)/2;
+ Object.assign(v.querySelector<HTMLElement>('.rg-mapimg')!.style,{left:ox+'px',top:oy+'px',width:iw+'px',height:ih+'px'});
+ const C=ns.map((n,i)=>{const px=ox+P[i].x*s,py=oy+P[i].y*s;n.style.left=px+'px';n.style.top=py+'px';return {n,px,py,r:n.offsetWidth/2};});
+ const circles:R[]=C.map(c=>({x:c.px-c.r-2,y:c.py-c.r-2,w:c.r*2+4,h:c.r*2+4})),placed:R[]=[];
+ C.forEach((c,i)=>{const lab=c.n.querySelector<HTMLElement>('.lab')!,w=lab.offsetWidth,h=lab.offsetHeight,g=3;
+  const cand:R[]=[{x:c.px-w/2,y:c.py+c.r+g,w,h},{x:c.px-w/2,y:c.py-c.r-g-h,w,h},{x:c.px+c.r+g,y:c.py-h/2,w,h},{x:c.px-c.r-g-w,y:c.py-h/2,w,h}];
+  const inside=(r:R)=>r.x>=2&&r.y>=2&&r.x+r.w<=W-2&&r.y+r.h<=H-2,clear=(r:R)=>!circles.some((q,j)=>j!==i&&hit(r,q)),free=(r:R)=>!placed.some(q=>hit(r,q));
+  const pick=cand.find(r=>inside(r)&&clear(r)&&free(r))??cand.find(r=>inside(r)&&clear(r))??cand[0];
+  placed.push(pick);lab.style.left=(pick.x-(c.px-c.r))+'px';lab.style.top=(pick.y-(c.py-c.r))+'px';});}
 const toastEl=()=>ui.toast?`<em class="rg-toast" role="status">${ui.toast}</em>`:'';
 const nameOf=(id:string)=>FOE_NAMES[id]??id;
 import {FOES} from './data.ts';
@@ -73,33 +96,45 @@ function rewardHTML(){const opts=run.reward!;
 function endHTML(){const win=run.phase==='clear',best=loadBest();
  return `<div class="rg">${scene(win?'town':'port',`<section class="rg-panel wide end ${win?'win':'lose'}"><h2>${win?'神栖は守られた！':'遠征は ここまで…'}</h2><p class="rg-line">${win?'ラスボスをたおして、3週間の遠征をやりとげた。':`第${run.chapter}週 ${Math.min(run.day,DAYS)}日目で、みんなたおれてしまった。`}</p><ul class="rg-stats"><li>すすんだ日数 <b>${run.stats.days}</b></li><li>戦闘 <b>${run.stats.battles}</b>回</li><li>ターン <b>${run.stats.turns}</b></li><li>クリア <b>${best.clears}</b>回 / 挑戦 <b>${best.runs}</b>回</li></ul><div class="rg-choices"><button data-rg="again" data-autofocus>もういちど遠征へ</button><button data-rg="title">タイトルへ</button></div></section>`)}</div>`;}
 
-function sheetHTML(){if(ui.sheet==='quit')return `<div class="rg-sheet" role="dialog" aria-label="確認"><div><h3>遠征をやめる？</h3><p>ここまでの進行は保存されます。タイトルの「つづきから」で再開できます。</p><div class="rg-choices"><button data-rg="sheetClose">続ける</button><button data-rg="title" data-autofocus>タイトルへ</button></div></div></div>`;
+function memberSheet(){const m=run.party[ui.sheetI];if(!m)return '';const e=evoOf(m),base=MEMBERS[m.id];
+ const rows=TRACKS.map(t=>{const P=PATH[t],n=e[t],target=e.tier===0?T1:e.tier===1&&e.path===t?T2:0,tier=(e.tier===0?1:2) as 1|2,mine=e.path===t,dim=e.tier>0&&!mine;
+  const pips=target?Array.from({length:target},(_,i)=>`<i class="${i<n?'on':''}"></i>`).join(''):'';
+  const next=target?`→ <b>${formName(m.id,base.name,t,tier)}</b>（わざ：${SKILLS[P.skills[tier-1]].name}）`:(mine&&e.tier===2?'最終しんか！':'');
+  return `<li class="${dim?'dim':''}" style="--c:${P.color}"><span class="mk">${P.mark}</span><div><b>${P.label}</b><small>${P.hint}</small><span class="pips">${pips}<em>${n}回</em></span><small>${next}</small></div></li>`;}).join('');
+ return `<div class="rg-sheet" role="dialog" aria-label="${m.name}"><div class="rg-msheet"><div class="rg-mhead">${img(m.art,'rg-face '+evoCls(m))}<div><h3>${m.name} <small>Lv${m.level}${e.tier?' '+'★'.repeat(e.tier):''}</small></h3><p>HP ${m.hp}/${m.maxHp}　気力 ${m.mp}/${m.maxMp}<br>こうげき ${m.atk}　ぼうぎょ ${m.def}　すばやさ ${m.spd}</p></div></div><h4>おぼえているわざ</h4><ul class="rg-sk">${m.skills.map(id=>SKILLS[id]).map(k=>`<li><b>${k.name}</b><small>気力${k.cost}・${k.note}</small></li>`).join('')}</ul><h4>しんかの道（3回くり返すと進化）</h4><ul class="rg-path">${rows}</ul><button data-rg="sheetClose" data-autofocus>とじる</button></div></div>`;}
+function sheetHTML(){if(ui.sheet==='member')return memberSheet();
+ if(ui.sheet==='quit')return `<div class="rg-sheet" role="dialog" aria-label="確認"><div><h3>遠征をやめる？</h3><p>ここまでの進行は保存されます。タイトルの「つづきから」で再開できます。</p><div class="rg-choices"><button data-rg="sheetClose">続ける</button><button data-rg="title" data-autofocus>タイトルへ</button></div></div></div>`;
  if(ui.sheet==='items'){const list=Object.keys(ITEMS).filter(id=>(run.items[id]??0)>0);return `<div class="rg-sheet" role="dialog" aria-label="どうぐ"><div><h3>どうぐ</h3>${list.length?`<ul class="rg-shop">${list.map(id=>`<li><span><b>${ITEMS[id].name} ×${run.items[id]}</b><small>${ITEMS[id].note}</small></span><button data-rg="pickItem" data-id="${id}">つかう</button></li>`).join('')}</ul>`:'<p>もっているどうぐはない。</p>'}<button data-rg="sheetClose" data-autofocus>とじる</button></div></div>`;}
  if(ui.sheet==='itemTarget')return `<div class="rg-sheet" role="dialog" aria-label="だれに使う？"><div><h3>${ITEMS[ui.sheetItem].name}をだれに？</h3><div class="rg-choices">${run.party.map((m,i)=>`<button data-rg="useOn" data-i="${i}">${m.name} <small>HP ${m.hp}/${m.maxHp}</small></button>`).join('')}</div><button data-rg="sheetClose" data-autofocus>もどる</button></div></div>`;
  return '';}
+
+function evoHTML(){if(!ui.evo)return '';const e=ui.evo.list[ui.evo.idx],P=PATH[e.after.path],last=ui.evo.idx>=ui.evo.list.length-1,sk=SKILLS[e.skill];
+ const row=(l:string,a:number,b:number)=>`<li><span>${l}</span><b>${a}</b><i>→</i><b class="up">${b}</b></li>`;
+ return `<div class="rg-evo" role="dialog" aria-label="進化" style="--c:${P.color}"><div class="rg-evo-box"><div class="rg-evo-stage"><i class="rays"></i><img class="old" alt="" src="${artURL(e.before.art)}"><img class="new evo evo-${e.after.path} t${e.after.tier}" alt="" src="${artURL(e.after.art)}"></div><div class="rg-evo-info"><small>${P.mark} ${P.label}へ — 「${P.hint}」を重ねた！</small><h2>${e.before.name}は<br><span>${e.after.name}</span>に進化した！</h2><ul>${row('HP',e.before.hp,e.after.hp)}${row('こうげき',e.before.atk,e.after.atk)}${row('ぼうぎょ',e.before.def,e.after.def)}${row('すばやさ',e.before.spd,e.after.spd)}${row('気力',e.before.mp,e.after.mp)}</ul><p>おぼえたわざ：<b>${sk.name}</b><small>　気力${sk.cost}・${sk.note}</small></p><button class="rg-go" data-rg="evoNext" data-autofocus>${last?'つづける':'つぎへ'}</button></div></div></div>`;}
 
 // ---------- battle ----------
 function snapshot():Vis{const b=run.battle!;return {foeHp:new Map(b.foes.map(f=>[f.uid,f.hp])),foeShown:new Set(b.foes.filter(f=>f.hp>0).map(f=>f.uid)),hp:run.party.map(m=>m.hp),mp:run.party.map(m=>m.mp),down:new Set(run.party.flatMap((m,i)=>m.hp<=0?['p'+i]:[]))};}
 function foeHTML(f:Foe){const v=ui.vis!,hp=v.foeHp.get(f.uid)??f.hp,dead=hp<=0;return `<button class="rg-foe ${dead?'dead':''} ${f.charging?'charging':''} ${ui.menu==='foe'&&!dead?'targetable':''}" data-rg="foe" data-uid="${f.uid}" style="--k:${(f.h/110).toFixed(2)}" aria-label="${f.name} HP${hp}/${f.maxHp}" ${dead?'tabindex="-1"':''}>${img(f.art,'rg-sprite')}<span class="rg-fname">${f.name}</span>${bar(hp,f.maxHp,'foe')}</button>`;}
 function stageHTML(){const b=run.battle!,v=ui.vis!;
- return `<div class="rg-foes">${b.foes.filter(f=>v.foeShown.has(f.uid)).map(foeHTML).join('')}</div><div class="rg-party">${run.party.map((m,i)=>`<button class="rg-mem ${v.down.has('p'+i)?'down':''} ${ui.menu==='ally'&&!v.down.has('p'+i)?'targetable':''}" data-rg="ally" data-i="${i}" aria-label="${m.name}">${img(m.art,'rg-sprite')}</button>`).join('')}</div>`;}
+ return `<div class="rg-party">${run.party.map((m,i)=>`<button class="rg-mem ${v.down.has('p'+i)?'down':''} ${ui.menu==='ally'&&!v.down.has('p'+i)?'targetable':''}" data-rg="ally" data-i="${i}" aria-label="${m.name}">${img(m.art,'rg-sprite '+evoCls(m))}</button>`).join('')}</div><div class="rg-foes">${b.foes.filter(f=>v.foeShown.has(f.uid)).map(foeHTML).join('')}</div>`;}
+const msgHTML=()=>ui.log.slice(-2).map(l=>`<p>${l}</p>`).join('');
 function battleHTML(){const b=run.battle!;if(!ui.vis)ui.vis=snapshot();
  const bg=b.boss?BOSS_BG[run.chapter-1]:PLACE_BG[run.lastPlace]??'town';
- return `<div class="rg rg-battle" style="--bg:url('${artURL(bg)}')"><div class="rg-stage" id="rg-stage">${stageHTML()}<div class="rg-banner">${b.boss?`ボス戦 — ${b.foes.find(f=>f.boss)?.name??''}`:`第${run.chapter}週 ${Math.min(run.day,DAYS+0)-1}日目`}<small>ターン ${b.round}</small></div></div><div class="rg-ui"><div class="rg-win rg-cmd" id="rg-cmd">${cmdHTML()}</div><div class="rg-win rg-msg" id="rg-msg" aria-live="polite">${ui.log.slice(-3).map(l=>`<p>${l}</p>`).join('')}</div><div class="rg-win rg-stat" id="rg-stat">${statHTML()}</div></div></div>`;}
-function statHTML(){const v=ui.vis!;return run.party.map((m,i)=>{const hp=v.hp[i]??m.hp,mp=v.mp[i]??m.mp,cur=!ui.busy&&!run.battle?.over&&ui.cur===i;return `<button class="rg-row ${cur?'cur':''} ${hp<=0?'ko':''}" data-rg="ally" data-i="${i}"><span>${m.name}<small>Lv${m.level}</small></span><span class="n">${hp}<small>/${m.maxHp}</small></span>${bar(hp,m.maxHp)}<span class="n mp">${mp}<small>気力</small></span></button>`;}).join('');}
+ return `<div class="rg rg-battle" style="--bg:url('${artURL(bg)}')"><div class="rg-stage" id="rg-stage">${stageHTML()}<div class="rg-banner">${b.boss?`ボス戦 — ${b.foes.find(f=>f.boss)?.name??''}`:`第${run.chapter}週 ${Math.max(1,Math.min(run.day,DAYS+1)-1)}日目`}<small>ターン ${b.round}</small></div><div class="rg-msg" id="rg-msg" aria-live="polite">${msgHTML()}</div></div><div class="rg-ui"><div class="rg-win"><div class="rg-cmd" id="rg-cmd">${cmdHTML()}</div><div class="rg-stat" id="rg-stat">${statHTML()}</div></div></div></div>`;}
+function statHTML(){const v=ui.vis!;return run.party.map((m,i)=>{const hp=v.hp[i]??m.hp,mp=v.mp[i]??m.mp,cur=!ui.busy&&!run.battle?.over&&ui.cur===i,e=m.evo;return `<div class="rg-row ${cur?'cur':''} ${hp<=0?'ko':''}"><span class="nm">${m.name}<small>Lv${m.level}${e&&e.tier?' '+'★'.repeat(e.tier):''}</small></span><span class="n">${hp}<small>/${m.maxHp}</small></span><span class="n mp">${mp}<small>気力</small></span>${bar(hp,m.maxHp)}</div>`;}).join('');}
 function cmdHTML():string{const b=run.battle!;
- if(b.over){const r=b.rewards;return b.over==='win'&&r?`<h3>勝利！</h3><p>かつおぶし +${r.gold}　経験値 +${r.xp}${r.items.length?`　${r.items.map(i=>ITEMS[i].name).join('・')}を手に入れた`:''}</p>${r.levelUps.length?`<p class="lv">${r.levelUps.join('　')} にレベルアップ！</p>`:''}<button class="rg-go" data-rg="after" data-autofocus>つづける</button>`:b.over==='fled'?`<h3>にげのびた</h3><button class="rg-go" data-rg="after" data-autofocus>つづける</button>`:`<h3>ぜんめつ…</h3><button class="rg-go" data-rg="after" data-autofocus>つづける</button>`;}
- if(ui.busy)return `<h3>…</h3><button data-rg="fast">${ui.fast?'ふつうの速さ':'はやおくり'}</button>`;
+ if(b.over){const r=b.rewards;const evo=r?.evos?.length?`<p class="lv">✨ ${r.evos.map(x=>x.before.name).join('・')} が進化できる！</p>`:'';return b.over==='win'&&r?`<h3>勝利！</h3><p>かつおぶし +${r.gold}　経験値 +${r.xp}${r.items.length?`　${r.items.map(i=>ITEMS[i].name).join('・')}を入手`:''}</p>${r.levelUps.length?`<p class="lv">${r.levelUps.join('　')} にレベルアップ！</p>`:''}${evo}<button class="rg-go" data-rg="after" data-autofocus>つづける</button>`:b.over==='fled'?`<h3>にげのびた</h3><button class="rg-go" data-rg="after" data-autofocus>つづける</button>`:`<h3>ぜんめつ…</h3><button class="rg-go" data-rg="after" data-autofocus>つづける</button>`;}
+ if(ui.busy)return `<div class="rg-head"><h3>たたかい中…</h3><button data-rg="fast">${ui.fast?'ふつうの速さ':'はやおくり'}</button></div>`;
  const m=run.party[ui.cur];if(!m)return '';
- const head=`<h3>${m.name}<small>のターン</small></h3>`;
- if(ui.menu==='main')return `${head}<div class="rg-list"><button data-rg="cmdAttack" data-autofocus>たたかう</button><button data-rg="cmdSkill" ${m.skills.length?'':'disabled'}>わざ</button><button data-rg="cmdItem">どうぐ</button><button data-rg="cmdGuard">ぼうぎょ</button><button data-rg="cmdFlee" ${b.boss?'disabled':''}>にげる</button>${ui.cur>firstLiving()?'<button class="back" data-rg="cmdBack">もどる</button>':''}</div>`;
- if(ui.menu==='skill')return `${head}<div class="rg-list">${m.skills.map(id=>SKILLS[id]).map(s=>`<button data-rg="cmdPick" data-id="${s.id}" ${m.mp>=s.cost?'':'disabled'}>${s.name}<small>気力${s.cost}　${s.note}</small></button>`).join('')}<button class="back" data-rg="menuMain">もどる</button></div>`;
- if(ui.menu==='item'){const list=Object.keys(ITEMS).filter(id=>(run.items[id]??0)>0);return `${head}<div class="rg-list">${list.map(id=>`<button data-rg="cmdItemPick" data-id="${id}">${ITEMS[id].name} ×${run.items[id]}<small>${ITEMS[id].note}</small></button>`).join('')||'<p>どうぐがない</p>'}<button class="back" data-rg="menuMain">もどる</button></div>`;}
- return `${head}<p>${ui.menu==='foe'?'ねらう敵をえらぼう':'だれに つかう？ 仲間をえらぼう'}</p><button class="back" data-rg="menuMain">もどる</button>`;}
+ const head=(back:string)=>`<div class="rg-head"><h3>${m.name}<small> のターン</small></h3>${back}</div>`,sub='<button class="back" data-rg="menuMain">もどる</button>';
+ if(ui.menu==='main')return `${head(ui.cur>firstLiving()?'<button class="back" data-rg="cmdBack">ひとつ前</button>':'')}<div class="rg-list main"><button data-rg="cmdAttack" data-autofocus>たたかう</button><button data-rg="cmdSkill" ${m.skills.length?'':'disabled'}>わざ</button><button data-rg="cmdItem">どうぐ</button><button data-rg="cmdGuard">ぼうぎょ</button><button data-rg="cmdFlee" ${b.boss?'disabled':''}>にげる</button></div>`;
+ if(ui.menu==='skill')return `${head(sub)}<div class="rg-list">${m.skills.map(id=>SKILLS[id]).map(s=>`<button data-rg="cmdPick" data-id="${s.id}" ${m.mp>=s.cost?'':'disabled'}><span>${s.name}<em>気力${s.cost}</em></span><small>${s.note}</small></button>`).join('')}</div>`;
+ if(ui.menu==='item'){const list=Object.keys(ITEMS).filter(id=>(run.items[id]??0)>0);return `${head(sub)}<div class="rg-list">${list.map(id=>`<button data-rg="cmdItemPick" data-id="${id}"><span>${ITEMS[id].name}<em>×${run.items[id]}</em></span><small>${ITEMS[id].note}</small></button>`).join('')||'<p>どうぐがない</p>'}</div>`;}
+ return `${head(sub)}<p class="rg-ask">${ui.menu==='foe'?'ねらう敵をタップしよう':'だれに つかう？ 仲間をタップしよう'}</p>`;}
 const firstLiving=()=>run.party.findIndex(m=>m.hp>0);
 function refresh(){const c=root.querySelector('#rg-cmd'),s=root.querySelector('#rg-stat'),st=root.querySelector('#rg-stage');if(!c||!run.battle)return render();
  c.innerHTML=cmdHTML();s!.innerHTML=statHTML();st!.querySelectorAll('.rg-foes,.rg-party').forEach(e=>e.remove());st!.insertAdjacentHTML('afterbegin',stageHTML());const f=c.querySelector<HTMLElement>('[data-autofocus]');f?.focus({preventScroll:true});}
-function say(text:string){ui.log.push(text);if(ui.log.length>30)ui.log.shift();const m=root.querySelector('#rg-msg');if(m)m.innerHTML=ui.log.slice(-3).map(l=>`<p>${l}</p>`).join('');}
+function say(text:string){ui.log.push(text);if(ui.log.length>30)ui.log.shift();const m=root.querySelector('#rg-msg');if(m)m.innerHTML=msgHTML();}
 
 function submit(cmd:Cmd){ui.cmds[ui.cur]=cmd;ui.menu='main';ui.pending=null;
  let next=ui.cur+1;while(next<run.party.length&&run.party[next].hp<=0)next++;
@@ -131,12 +166,13 @@ async function play(e:Ev){const v=ui.vis!;
 }
 
 // ---------- input ----------
+function finishAfter(){const b=run.battle;if(b?.over){const end=run.phase==='over'||run.phase==='clear';if(end)recordResult(run,run.phase==='clear');dismissBattle(run);ui.vis=null;ui.log=[];ui.toast='';ui.evoSeen=false;save();render();}}
 function onClick(ev:Event){const el=(ev.target as HTMLElement).closest<HTMLElement>('[data-rg]');if(!el||el.hasAttribute('disabled'))return;const a=el.dataset.rg!,i=Number(el.dataset.i),id=el.dataset.id??'';
  if(ui.busy&&a!=='fast')return;
  const b=run.battle;
  switch(a){
   case 'node':ui.sel=ui.sel===i?-1:i;ui.toast='';return render();
-  case 'go':if(ui.sel>=0&&visit(run,ui.sel)){const k=run.nodes[ui.sel].kind;ui.sel=-1;ui.toast='';ui.vis=null;ui.log=[];ui.cur=0;ui.cmds=[];ui.menu='main';if(k==='rest'){rest(run);ui.toast='ゆっくり休んで、HPと気力がかいふくした。';}save();render();}return;
+  case 'go':if(ui.sel>=0&&visit(run,ui.sel)){const k=run.nodes[ui.sel].kind;ui.sel=-1;ui.toast='';ui.vis=null;ui.evoSeen=false;ui.log=[];ui.cur=0;ui.cmds=[];ui.menu='main';if(k==='rest'){rest(run);ui.toast='ゆっくり休んで、HPと気力がかいふくした。';}save();render();}return;
   case 'boss':if(startBoss(run)){ui.vis=null;ui.log=[];ui.cur=0;ui.cmds=[];ui.menu='main';ui.sel=-1;save();render();}return;
   case 'bossHint':ui.toast=`${DAYS}日目になるとボスに挑める。それまでに仲間とどうぐを整えよう。`;return render();
   case 'items':ui.sheet='items';return render();
@@ -144,7 +180,6 @@ function onClick(ev:Event){const el=(ev.target as HTMLElement).closest<HTMLEleme
   case 'sheetClose':ui.sheet='';return render();
   case 'pickItem':ui.sheetItem=id;ui.sheet='itemTarget';if(id==='feast'){if(useItem(run,id,0))ui.toast='ごちそうで みんな元気になった。';else ui.toast='いまは使う必要がない。';ui.sheet='';save();}return render();
   case 'useOn':if(useItem(run,ui.sheetItem,i))ui.toast=`${ITEMS[ui.sheetItem].name}を つかった。`;else ui.toast='いまは使えない。';ui.sheet='';save();return render();
-  case 'member':return;
   case 'evPick':chooseEvent(run,i);save();return render();
   case 'evDone':finishEvent(run);ui.toast='';save();return render();
   case 'buy':if(buy(run,id)){hooks.sfx('spawn');save();render();}return;
@@ -153,7 +188,9 @@ function onClick(ev:Event){const el=(ev.target as HTMLElement).closest<HTMLEleme
   case 'again':clearRun();run=newRun();ui.sel=-1;ui.vis=null;ui.toast='新しい遠征のはじまり！';save();return render();
   case 'title':if(run.phase==='over'||run.phase==='clear')clearRun();else save();closeRogue();hooks.exit();return;
   case 'fast':ui.fast=!ui.fast;return refresh();
-  case 'after':{if(b?.over){const end=run.phase==='over'||run.phase==='clear';if(end)recordResult(run,run.phase==='clear');dismissBattle(run);ui.vis=null;ui.log=[];ui.toast='';save();render();}return;}
+  case 'after':{if(b?.over==='win'&&b.rewards?.evos?.length&&!ui.evoSeen){ui.evoSeen=true;ui.evo={list:b.rewards.evos,idx:0};hooks.sfx('win');setTimeout(()=>hooks.sfx('spawn'),1500);return render();}return finishAfter();}
+  case 'evoNext':{if(!ui.evo)return;ui.evo.idx++;if(ui.evo.idx>=ui.evo.list.length){ui.evo=null;return finishAfter();}hooks.sfx('win');setTimeout(()=>hooks.sfx('spawn'),1500);return render();}
+  case 'member':ui.sheetI=i;ui.sheet='member';return render();
   // battle commands
   case 'cmdAttack':{const foes=b!.foes.filter(f=>f.hp>0);if(foes.length===1)submit({t:'attack',target:foes[0].uid});else{ui.pending={t:'attack'};ui.menu='foe';refresh();}return;}
   case 'cmdSkill':ui.menu='skill';return refresh();

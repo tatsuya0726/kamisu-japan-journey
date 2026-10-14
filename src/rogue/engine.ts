@@ -1,15 +1,16 @@
 /** Turn-based roguelike run engine. Deterministic for a given seed; mutates the RunState it is given. */
+import {evoOf,evoStats,trackAct,formName,formArt,PATH,type Evo,type EvoEvent,type Track} from './evolve.ts';
 import {MEMBERS,SKILLS,FOES,BOSSES,PLACE_POOLS,CHAPTER,ITEMS,PERKS,EVENTS,RECRUITS,type FoeT,type Outcome} from './data.ts';
 
 /** Global foe damage tuning. */
-export const ATK_SCALE=.7;
+export const ATK_SCALE=.85;
 export const DAYS=7,CHAPTERS=3,PARTY_MAX=4,ITEM_MAX=9;
 export type Phase='map'|'battle'|'event'|'shop'|'rest'|'reward'|'over'|'clear';
 export type Kind='battle'|'elite'|'event'|'rest'|'shop';
-export type Member={id:string;name:string;art:string;level:number;xp:number;hp:number;maxHp:number;mp:number;maxMp:number;atk:number;def:number;spd:number;skills:string[];guard:boolean;shield:{mul:number;turns:number}|null;flat:number};
+export type Member={id:string;name:string;art:string;level:number;xp:number;hp:number;maxHp:number;mp:number;maxMp:number;atk:number;def:number;spd:number;skills:string[];guard:boolean;shield:{mul:number;turns:number}|null;flat:number;evo?:Evo};
 export type Foe={uid:number;id:string;name:string;art:string;h:number;hp:number;maxHp:number;atk:number;def:number;spd:number;moves:FoeT['moves'];boss:boolean;pattern?:string;turn:number;atkUp:number;guard:number;phase2:boolean;charging:boolean};
 export type Node={kind:Kind;visited:boolean;foes:string[];eventId?:string;offers?:string[]};
-export type Battle={foes:Foe[];round:number;boss:boolean;elite:boolean;over:''|'win'|'lose'|'fled';rewards:{gold:number;xp:number;items:string[];levelUps:string[]}|null};
+export type Battle={foes:Foe[];round:number;boss:boolean;elite:boolean;over:''|'win'|'lose'|'fled';rewards:{gold:number;xp:number;items:string[];levelUps:string[];evos:EvoEvent[]}|null};
 export type RewardOpt={kind:'perk'|'recruit';id:string};
 export type RunState={v:1;seed:number;rng:number;chapter:number;day:number;gold:number;party:Member[];items:Record<string,number>;perks:string[];nodes:Node[];phase:Phase;battle:Battle|null;event:{id:string;done:boolean;text:string}|null;shop:{offers:string[]}|null;reward:RewardOpt[]|null;nextUid:number;lastPlace:number;stats:{battles:number;days:number;turns:number}};
 export type Cmd={t:'attack';target:number}|{t:'skill';skill:string;target:number}|{t:'item';item:string;target:number}|{t:'guard'}|{t:'flee'};
@@ -32,9 +33,9 @@ const pickOne=<T>(run:RunState,list:readonly T[])=>list[randInt(run,list.length)
 function shuffle<T>(run:RunState,list:T[]){const a=[...list];for(let i=a.length-1;i>0;i--){const j=randInt(run,i+1);[a[i],a[j]]=[a[j],a[i]];}return a;}
 
 const has=(run:RunState,perk:string)=>run.perks.includes(perk);
-export function recalc(run:RunState,m:Member){const t=MEMBERS[m.id],lv=1+.1*(m.level-1),oldHp=m.maxHp,oldMp=m.maxMp;
- m.maxHp=Math.round(t.hp*lv*(has(run,'hp')?1.15:1))+m.flat;m.maxMp=Math.round(t.mp+(m.level-1)*1.2)+(has(run,'mp')?6:0);
- m.atk=Math.round(t.atk*lv*(has(run,'atk')?1.12:1));m.def=Math.round(t.def*lv*(has(run,'def')?1.15:1));m.spd=t.spd;
+export function recalc(run:RunState,m:Member){const t=MEMBERS[m.id],lv=1+.1*(m.level-1),oldHp=m.maxHp,oldMp=m.maxMp,E=evoStats(m);
+ m.maxHp=Math.round(t.hp*lv*(has(run,'hp')?1.15:1)*E.hp)+m.flat;m.maxMp=Math.round(t.mp+(m.level-1)*1.2)+(has(run,'mp')?6:0)+E.mp;
+ m.atk=Math.round(t.atk*lv*(has(run,'atk')?1.12:1)*E.atk);m.def=Math.round(t.def*lv*(has(run,'def')?1.15:1)*E.def);m.spd=t.spd+E.spd;
  if(m.hp>0){m.hp+=Math.max(0,m.maxHp-oldHp);}m.hp=Math.min(m.hp,m.maxHp);m.mp=Math.min(m.maxMp,m.mp+Math.max(0,m.maxMp-oldMp));}
 export function makeMember(run:RunState,id:string,level=1):Member{const t=MEMBERS[id];const m:Member={id,name:t.name,art:t.art,level,xp:0,hp:1,maxHp:1,mp:0,maxMp:0,atk:0,def:0,spd:0,skills:[...t.skills],guard:false,shield:null,flat:0};recalc(run,m);m.hp=m.maxHp;m.mp=m.maxMp;return m;}
 export const xpNeed=(level:number)=>20+level*8;
@@ -138,10 +139,10 @@ function endRound(run:RunState,b:Battle){b.round++;run.stats.turns++;
 function partyAct(run:RunState,b:Battle,i:number,c:Cmd,evs:Ev[]){const m=run.party[i],me=refP(i);
  const foeTarget=(uid:number)=>{const t=livingFoes(b).find(f=>f.uid===uid)??livingFoes(b)[0];return t;};
  const hitFoe=(f:Foe,pow:number,name:string,hits=1)=>{for(let k=0;k<hits&&f.hp>0;k++){const crit=rand(run)<.08;let d=strike(run,m.atk,pow,f.def,crit?1.5:1);if(f.guard>0)d=Math.max(1,Math.round(d*.5));f.hp=Math.max(0,f.hp-d);evs.push({t:'hit',from:me,to:refF(f),dmg:d,hp:f.hp,crit,name});if(f.hp<=0){evs.push({t:'ko',who:refF(f)});}}};
- if(c.t==='guard'){m.guard=true;evs.push({t:'msg',text:`${m.name}は身をまもっている`});return;}
+ if(c.t==='guard'){trackAct(m,'shell');m.guard=true;evs.push({t:'msg',text:`${m.name}は身をまもっている`});return;}
  if(c.t==='flee'){if(b.boss){evs.push({t:'msg',text:'ボスからは にげられない！'});return;}if(rand(run)<.55){b.over='fled';run.gold=Math.floor(run.gold*.9);run.phase='map';run.battle=b;evs.push({t:'msg',text:'うまく にげきれた！(かつおぶしを少し落とした)'},{t:'end',result:'fled'});}else evs.push({t:'msg',text:'にげられなかった！'});return;}
- if(c.t==='item'){const ok=useItem(run,c.item,c.target,evs);if(!ok)evs.push({t:'msg',text:'しかし 何も起きなかった'});return;}
- if(c.t==='skill'){const s=SKILLS[c.skill];if(s&&m.skills.includes(s.id)&&m.mp>=s.cost){m.mp-=s.cost;evs.push({t:'mp',to:me,mp:m.mp});
+ if(c.t==='item'){const ok=useItem(run,c.item,c.target,evs);if(ok)trackAct(m,'heart');if(!ok)evs.push({t:'msg',text:'しかし 何も起きなかった'});return;}
+ if(c.t==='skill'){const s=SKILLS[c.skill];if(s&&m.skills.includes(s.id)&&m.mp>=s.cost){m.mp-=s.cost;trackAct(m,s.kind==='dmg'?'fang':s.kind==='heal'?'heart':'shell');evs.push({t:'mp',to:me,mp:m.mp});
    if(s.kind==='dmg'){if(s.target==='foes'){evs.push({t:'msg',text:`${m.name}の${s.name}！`});for(const f of [...livingFoes(b)])hitFoe(f,s.power,s.name);}else{const f=foeTarget(c.target);if(f){evs.push({t:'msg',text:`${m.name}の${s.name}！`});hitFoe(f,s.power,s.name,s.hits??1);}}}
    else if(s.kind==='heal'){evs.push({t:'msg',text:`${m.name}の${s.name}！`});
      const weakest=()=>living(run).sort((x,y)=>x.m.hp/x.m.maxHp-y.m.hp/y.m.maxHp)[0];
@@ -149,7 +150,7 @@ function partyAct(run:RunState,b:Battle,i:number,c:Cmd,evs:Ev[]){const m=run.par
      for(const t of targets){const a=Math.min(t.m.maxHp-t.m.hp,Math.round(t.m.maxHp*s.power+(s.target==='ally'?m.atk*.4:0)));t.m.hp+=a;evs.push({t:'heal',to:refP(t.i),amount:a,hp:t.m.hp,name:s.name});}}
    else{evs.push({t:'msg',text:`${m.name}の${s.name}！ みんなの守りが固くなった`});for(const t of living(run))t.m.shield={mul:s.mul!,turns:s.turns!+1};}
    return;}}
- const f=foeTarget((c as {target:number}).target);if(f){evs.push({t:'msg',text:`${m.name}のこうげき！`});hitFoe(f,1,'こうげき');}}
+ trackAct(m,'fang');const f=foeTarget((c as {target:number}).target);if(f){evs.push({t:'msg',text:`${m.name}のこうげき！`});hitFoe(f,1,'こうげき');}}
 
 function foeAct(run:RunState,b:Battle,f:Foe,evs:Ev[]){
  if(f.boss&&!f.phase2&&f.hp<=f.maxHp/2){f.phase2=true;if(f.pattern==='sardine'){const add=[makeFoe(run,FOES.buzz_bee,run.chapter),makeFoe(run,FOES.buzz_bee,run.chapter)];b.foes.push(...add);evs.push({t:'msg',text:`${f.name}が 怒った！ ハチたちが 助けにきた！`},{t:'summon',foes:add});}
@@ -166,13 +167,21 @@ function foeAct(run:RunState,b:Battle,f:Foe,evs:Ev[]){
  evs.push({t:'msg',text:`${f.name}の${mv.n}！`});
  for(const t of targets){const m=t.m;let d=strike(run,f.atk*(f.atkUp>0?1.3:1),mv.p,m.def,(m.guard?.5:1)*(m.shield?m.shield.mul:1));m.hp=Math.max(0,m.hp-d);evs.push({t:'hit',from:me,to:refP(t.i),dmg:d,hp:m.hp,crit:false,name:mv.n});if(m.hp<=0)evs.push({t:'ko',who:refP(t.i)});}}
 
+export function checkEvolutions(run:RunState):EvoEvent[]{const out:EvoEvent[]=[];
+ run.party.forEach((m,i)=>{const e=evoOf(m);if(!e.ready)return;const p=e.ready as Track,tier=(e.tier+1) as 1|2,t=MEMBERS[m.id];
+  const snap=()=>({name:m.name,art:m.art,hp:m.maxHp,mp:m.maxMp,atk:m.atk,def:m.def,spd:m.spd,path:e.path as ''|Track,tier:e.tier});
+  const before=snap();e.path=p;e.tier=tier;e.ready='';m.name=formName(m.id,t.name,p,tier);m.art=formArt(m.id,t.art,p);
+  const sk=PATH[p].skills[tier-1];if(!m.skills.includes(sk))m.skills.push(sk);recalc(run,m);if(m.hp>0)m.hp=Math.min(m.maxHp,m.hp+Math.round(m.maxHp*.1));
+  out.push({i,before,after:{name:m.name,art:m.art,hp:m.maxHp,mp:m.maxMp,atk:m.atk,def:m.def,spd:m.spd,path:p,tier},skill:sk});});
+ return out;}
+
 function winBattle(run:RunState,b:Battle,evs:Ev[]){b.over='win';const ch=run.chapter;
  let gold=0,xp=0;for(const f of b.foes){xp+=f.boss?70+ch*20:Math.round((6+ch*3)*(b.elite?1.6:1));gold+=f.boss?30*ch:Math.round((4+ch*3)*(b.elite?1.8:1));}
  if(has(run,'lucky'))gold=Math.round(gold*1.5);run.gold+=gold;const items:string[]=[];
  if(b.elite||(!b.boss&&rand(run)<.3)){const it=b.elite?pickOne(run,['onigiri','matatabi','kankan']):'onigiri';if((run.items[it]??0)<ITEM_MAX){run.items[it]=(run.items[it]??0)+1;items.push(it);}}
  const levelUps=gainXp(run,xp,evs);
  if(has(run,'purr'))for(const m of run.party)if(m.hp>0)m.hp=Math.min(m.maxHp,m.hp+Math.round(m.maxHp*.06));
- b.rewards={gold,xp,items,levelUps};
+ const evos=checkEvolutions(run);b.rewards={gold,xp,items,levelUps,evos};
  if(b.boss){if(ch>=CHAPTERS)run.phase='clear';else{run.reward=rewardOptions(run);run.phase='reward';}}else run.phase='map';
  evs.push({t:'end',result:'win'});}
 

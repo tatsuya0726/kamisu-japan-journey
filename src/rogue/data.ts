@@ -15,6 +15,12 @@ export const SKILLS:Record<string,SkillT>={
  tailwind:{id:'tailwind',name:'追い風',cost:7,target:'allies',kind:'heal',power:.25,note:'全員のHPを回復'},
  bigshield:{id:'bigshield',name:'大盾',cost:6,target:'allies',kind:'shield',power:0,mul:.45,turns:3,note:'3ターン、全員の受けるダメージを大きく減らす'},
  colors:{id:'colors',name:'色あざやか',cost:8,target:'foes',kind:'dmg',power:1.05,note:'敵全体に強めのダメージ'},
+ fangstrike:{id:'fangstrike',name:'牙突き',cost:4,target:'foe',kind:'dmg',power:1.7,note:'1体に鋭い一撃'},
+ rampage:{id:'rampage',name:'乱れ爪',cost:8,target:'foes',kind:'dmg',power:1.05,note:'敵全体を切りさく'},
+ bulwark:{id:'bulwark',name:'防壁',cost:5,target:'allies',kind:'shield',power:0,mul:.55,turns:2,note:'2ターン、全員のダメージを減らす'},
+ shellbash:{id:'shellbash',name:'盾たいあたり',cost:5,target:'foe',kind:'dmg',power:1.4,note:'かたい体で1体にぶつかる'},
+ warmth:{id:'warmth',name:'ぬくもり',cost:6,target:'allies',kind:'heal',power:.2,note:'全員のHPを回復'},
+ bless:{id:'bless',name:'祝福のにゃあ',cost:8,target:'ally',kind:'heal',power:.75,note:'仲間1人を大きく回復'},
  fist:{id:'fist',name:'正拳突き',cost:6,target:'foe',kind:'dmg',power:2.4,note:'1体に大ダメージ'}
 };
 
@@ -31,7 +37,7 @@ export const MEMBERS:Record<string,MemberT>={
  artist:{id:'artist',name:'絵描き猫',art:'artist',hp:80,mp:20,atk:14,def:5,spd:10,skills:['colors'],blurb:'敵全体に強めの攻撃'},
  karate:{id:'karate',name:'空手猫',art:'karate',hp:98,mp:12,atk:20,def:6,spd:15,skills:['fist'],blurb:'すばやく強い'}
 };
-export const RECRUITS=Object.keys(MEMBERS).filter(id=>id!=='kiki'&&id!=='nene');
+export const RECRUITS=Object.keys(MEMBERS).filter(id=>!['kiki','nene','kiki-sword','kiki-fish','nene-wings','nene-guard'].includes(id));
 
 export type MoveT={n:string;p:number;w:number;all?:boolean;buff?:'atkUp'|'guard'|'healSelf'};
 export type FoeT={id:string;name:string;art:string;hp:number;atk:number;def:number;spd:number;h:number;moves:MoveT[]};

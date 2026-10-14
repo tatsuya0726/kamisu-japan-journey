@@ -1,0 +1,218 @@
+﻿[
+    {
+        "width":  256,
+        "height":  215,
+        "id":  "buzz_bee",
+        "source_bytes":  734425,
+        "alpha_crop":  [
+                           84,
+                           164,
+                           1101,
+                           920
+                       ],
+        "pose":  "static",
+        "foot_y":  0.98139534883720925,
+        "facing":  "left",
+        "bytes":  78335,
+        "source_sha256":  "146bf0e8a3d88fa5ea8cda44f9f0dec63ff6dc84d7abb39144e0bfb3a61a67d2",
+        "file":  "extra-buzz_bee.png"
+    },
+    {
+        "width":  224,
+        "height":  256,
+        "id":  "bee_swarm",
+        "source_bytes":  892609,
+        "alpha_crop":  [
+                           223,
+                           114,
+                           932,
+                           1068
+                       ],
+        "pose":  "static",
+        "foot_y":  0.984375,
+        "facing":  "left",
+        "bytes":  96405,
+        "source_sha256":  "f7441ed0c9c05e1e42d7ebeb1a4d4c6d021cd0864a7c512ad7ca879ec1e97a82",
+        "file":  "extra-bee_swarm.png"
+    },
+    {
+        "width":  256,
+        "height":  212,
+        "id":  "bubble_fish",
+        "source_bytes":  719526,
+        "alpha_crop":  [
+                           178,
+                           248,
+                           989,
+                           814
+                       ],
+        "pose":  "static",
+        "foot_y":  0.98113207547169812,
+        "facing":  "left",
+        "bytes":  95363,
+        "source_sha256":  "ff6bac653246bc54314744ad26ef2b942359f9a6468b29c060a138e2e3956c13",
+        "file":  "extra-bubble_fish.png"
+    },
+    {
+        "width":  256,
+        "height":  207,
+        "id":  "spring_mullet",
+        "source_bytes":  576039,
+        "alpha_crop":  [
+                           137,
+                           235,
+                           1009,
+                           811
+                       ],
+        "pose":  "static",
+        "foot_y":  0.98067632850241548,
+        "facing":  "left",
+        "bytes":  72230,
+        "source_sha256":  "6511564767c289c86d78d7361601c0304e91e382b679a23caae25748c9ffdfa1",
+        "file":  "extra-spring_mullet.png"
+    },
+    {
+        "width":  384,
+        "height":  238,
+        "id":  "giant_sardine",
+        "source_bytes":  882209,
+        "alpha_crop":  [
+                           38,
+                           309,
+                           1200,
+                           734
+                       ],
+        "pose":  "static",
+        "foot_y":  0.98319327731092432,
+        "facing":  "left",
+        "bytes":  169661,
+        "source_sha256":  "a26bc2e159aa51d9e05b3035f4d02622a852b3a62f053fd9ca393889f9fa864c",
+        "file":  "extra-giant_sardine.png"
+    },
+    {
+        "width":  256,
+        "height":  218,
+        "id":  "crab_drummer",
+        "source_bytes":  1455718,
+        "alpha_crop":  [
+                           247,
+                           62,
+                           1064,
+                           900
+                       ],
+        "pose":  "static",
+        "foot_y":  0.981651376146789,
+        "facing":  "left",
+        "bytes":  89904,
+        "source_sha256":  "d8593bc4c25e4b92729644633381464145acc3944c8090c87c8e59a102065d90",
+        "file":  "extra-crab_drummer.png"
+    },
+    {
+        "width":  256,
+        "height":  245,
+        "id":  "wind_kite",
+        "source_bytes":  581550,
+        "alpha_crop":  [
+                           141,
+                           138,
+                           1048,
+                           1001
+                       ],
+        "pose":  "static",
+        "foot_y":  0.98367346938775513,
+        "facing":  "left",
+        "bytes":  64737,
+        "source_sha256":  "909445dd47f14cc8536ce03a6093d2405626c36ccf7d6b1856c16f06f7d95ac6",
+        "file":  "extra-wind_kite.png"
+    },
+    {
+        "width":  225,
+        "height":  256,
+        "id":  "pepper_marun",
+        "source_bytes":  1067943,
+        "alpha_crop":  [
+                           390,
+                           100,
+                           731,
+                           834
+                       ],
+        "pose":  "static",
+        "foot_y":  0.984375,
+        "facing":  "left",
+        "bytes":  96529,
+        "source_sha256":  "5d2f003b9b84e0d7f8f8639f4770db3230ab15d29ab003f8ec5cf74fa041fb8d",
+        "file":  "extra-pepper_marun.png"
+    },
+    {
+        "width":  241,
+        "height":  256,
+        "id":  "wave_pukkun",
+        "source_bytes":  1289572,
+        "alpha_crop":  [
+                           322,
+                           49,
+                           874,
+                           931
+                       ],
+        "pose":  "static",
+        "foot_y":  0.984375,
+        "facing":  "left",
+        "bytes":  106571,
+        "source_sha256":  "a3924c13f431f32ad812ae12c9dcba1859e25ec19908d9d39cbcb677088b8ca3",
+        "file":  "extra-wave_pukkun.png"
+    },
+    {
+        "width":  197,
+        "height":  256,
+        "id":  "pine_mokomaru",
+        "source_bytes":  629545,
+        "alpha_crop":  [
+                           296,
+                           124,
+                           724,
+                           950
+                       ],
+        "pose":  "static",
+        "foot_y":  0.984375,
+        "facing":  "left",
+        "bytes":  89048,
+        "source_sha256":  "3e40d2b2497f23b783d680f0e293fd60aa5029796f18772e93f6dd1e532c701d",
+        "file":  "extra-pine_mokomaru.png"
+    },
+    {
+        "width":  197,
+        "height":  256,
+        "id":  "rattle_rider",
+        "source_bytes":  794632,
+        "alpha_crop":  [
+                           275,
+                           92,
+                           781,
+                           1026
+                       ],
+        "pose":  "static",
+        "foot_y":  0.984375,
+        "facing":  "left",
+        "bytes":  92908,
+        "source_sha256":  "9f29f60d62da5c437b57d56ff77300c4524734c10831130cc60fd600fa65d04d",
+        "file":  "extra-rattle_rider.png"
+    },
+    {
+        "width":  256,
+        "height":  214,
+        "id":  "can_robot",
+        "source_bytes":  912502,
+        "alpha_crop":  [
+                           99,
+                           76,
+                           1190,
+                           989
+                       ],
+        "pose":  "static",
+        "foot_y":  0.98130841121495327,
+        "facing":  "left",
+        "bytes":  83800,
+        "source_sha256":  "26e607ac5f59136c03194eb44b0cd137213905ede4ce8bf164873343c351fd69",
+        "file":  "extra-can_robot.png"
+    }
+]

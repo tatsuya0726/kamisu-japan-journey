@@ -28,6 +28,6 @@ Chrome UI checked: landmark selection, six mission buttons, introduction portrai
 
 ## Pending
 
-The twelve enemy illustrations have not been received. Current enemies use colored temporary shapes with names. Visual art integration and final mobile/desktop checks remain before considering this a finished release.
+The twelve enemy illustrations have now been received and integrated. See `ENEMY-ART-INTEGRATION.md` for sizes, loading behavior, and validation evidence. Named temporary shapes remain only as an image-load failure fallback.
 
 Publishing is blocked by automatic approval review. The one requested retry of `git -c safe.directory=C:/Users/god03/Documents/Codex/2026-10-13/task-2/PhaserJapan -c 'credential.helper=!gh auth git-credential' push origin 2c90bfa:main` was rejected because the review could not reliably connect approval with this exact public main-branch push. No alternative publishing route was attempted. The map commit and this mission work remain local.

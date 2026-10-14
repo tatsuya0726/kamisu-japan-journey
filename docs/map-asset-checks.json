@@ -1,0 +1,68 @@
+[
+  {
+    "source": "ikisu-shrine-real-reference-v1.png",
+    "runtime": "ikisu.png",
+    "bytes": 2642947,
+    "sha256": "671e919d9b5fc978c11c727177b51a92a65c3e4a84249901b80b42e5bbd1e50a"
+  },
+  {
+    "source": "ishigami-kindergarten-real-reference-v1.png",
+    "runtime": "ishigami.png",
+    "bytes": 2321863,
+    "sha256": "c0df0f206d051cd06db40939aca8b65deb4b94b2be3a519232c2b512aa47df75"
+  },
+  {
+    "source": "karuno-elementary-real-reference-v1.png",
+    "runtime": "karuno.png",
+    "bytes": 2232605,
+    "sha256": "e23a027e2f8000c1143f3ac52b3fad68f9308222cf25cf846bc2204dc41538aa"
+  },
+  {
+    "source": "1000-people-gallery-real-reference-v1.png",
+    "runtime": "gallery.png",
+    "bytes": 2197304,
+    "sha256": "a80602f28b1706e2b0d43c46644f2b97b40a95a926526e87bcdd61e973009ad2"
+  },
+  {
+    "source": "kamisu-central-park-real-reference-v1.png",
+    "runtime": "central-park.png",
+    "bytes": 2480909,
+    "sha256": "8cf220136a26b07dd7cf3df11293562f4ddcaeaf10cfab0072e905850e4e0ed4"
+  },
+  {
+    "source": "kamisu-disaster-arena-real-reference-v1.png",
+    "runtime": "arena.png",
+    "bytes": 2218393,
+    "sha256": "3b5b5fac6ce8579818f98987eac6d13a2bb224807d549545a4bd04ec93813058"
+  },
+  {
+    "source": "minato-park-real-reference-v1.png",
+    "runtime": "port-park.png",
+    "bytes": 2238197,
+    "sha256": "711bbd0e718de76a559d50a6ad57f20b58f1f1a65dacd044c605918f734f8619"
+  },
+  {
+    "source": "kiki-wooden-sword-v2.png",
+    "runtime": "kiki-sword.png",
+    "bytes": 1129488,
+    "sha256": "5c8d281404378bc6016d610672963d51afecaa09f585ff5c05b13af22940d8c8"
+  },
+  {
+    "source": "kiki-fish-runner-v2.png",
+    "runtime": "kiki-fish.png",
+    "bytes": 1063163,
+    "sha256": "4c19825c391f7fa3f749b9553a517b5e217afdfdfd25fb02c8a68dbe035cf61f"
+  },
+  {
+    "source": "nene-wing-support-v2.png",
+    "runtime": "nene-wings.png",
+    "bytes": 1051431,
+    "sha256": "824d63026e0049320a7001917ef4d832b9b92a5a209763aa7af22b60e9d33f71"
+  },
+  {
+    "source": "nene-fluffy-guard-v2.png",
+    "runtime": "nene-guard.png",
+    "bytes": 1665943,
+    "sha256": "cf6f1a2b701ac5a308c2f0d850f52f28ee88c2cd47eb4966b4cda86113d48eda"
+  }
+]

@@ -18,7 +18,11 @@ export const CAT_TIPS = [
  '少ないごはんで呼べる前衛。まずはこの子から。',
  '体力が高い守り役。遠距離ネコを後ろで守ろう。',
  '前の仲間を越えて攻撃。盾ネコと組ませよう。',
- '足が速い攻め役。空いた前線をすばやく進もう。'
+ '足が速い攻め役。空いた前線をすばやく進もう。',
+ '木剣を持ったキキ。少し長い間合いから、強い一撃。',
+ 'おさかなを運ぶキキ。いちばん速く進み、素早く応援する。',
+ '翼をつけたネネ。遠くから応援するが、敵の攻撃は受ける。',
+ 'もこもこガードのネネ。ごはんは多く必要だが、長く前線を支える。'
 ];
 
-export const CAT_SPRITES = ['cream','silver','farmer','courier'];
+export const CAT_SPRITES = ['cream','silver','farmer','courier','kiki-sword','kiki-fish','nene-wings','nene-guard'];

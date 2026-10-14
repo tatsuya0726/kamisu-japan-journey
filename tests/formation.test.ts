@@ -1,0 +1,7 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {fresh,tick,CATS,STAGES,FIELD} from '../src/defense.ts';
+const advance=(s:ReturnType<typeof fresh>,seconds:number)=>{for(let i=0;i<seconds*20;i++)tick(s,.05);};
+test('overlapping cats contribute damage once each with independent cooldowns',()=>{const s=fresh();s.wave=STAGES[0].waves.length;s.units=[0,1,2,3].map(kind=>({id:kind+1,side:0 as const,kind,x:400,hp:1000,max:1000,cool:0,flash:0}));s.units.push({id:5,side:1,kind:2,x:438,hp:1000,max:1000,cool:100,flash:0});advance(s,.1);assert.equal(s.units[4].hp,915);assert.ok(s.units.slice(0,4).every(u=>u.cool>0));advance(s,.5);assert.equal(s.units[4].hp,915);advance(s,.1);assert.equal(s.units[4].hp,891);});
+test('target death is counted once and stacked cats resume moving',()=>{const s=fresh();s.wave=STAGES[0].waves.length;s.units=[{id:1,side:0,kind:0,x:400,hp:1000,max:1000,cool:0,flash:0},{id:2,side:0,kind:0,x:400,hp:1000,max:1000,cool:0,flash:0},{id:3,side:1,kind:0,x:440,hp:1,max:1,cool:100,flash:0}];advance(s,.1);assert.equal(s.kills,1);assert.equal(s.units.length,2);const x=s.units[0].x;advance(s,1);assert.ok(s.units.every(u=>u.x>x));assert.equal(s.kills,1);});
+test('all roles stop at their own range before the opposing base',()=>{const s=fresh();s.wave=STAGES[0].waves.length;s.enemyBase=100000;s.units=CATS.map((_,kind)=>({id:kind+1,side:0 as const,kind,x:700,hp:1000,max:1000,cool:0,flash:0}));advance(s,50);for(const u of s.units)assert.ok(Math.abs(u.x-(FIELD.enemy-CATS[u.kind].range))<.001);assert.ok(s.enemyBase<100000);});

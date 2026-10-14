@@ -1,0 +1,6 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {CATS,STAGES,fresh,spawn,tick} from '../src/defense.ts';
+test('every variant charges its own cost once and has an independent cooldown',()=>{for(let kind=4;kind<8;kind++){const s=fresh();s.food=400;assert.equal(spawn(s,kind),true);assert.equal(s.food,400-CATS[kind].cost);assert.equal(s.cooldowns[kind],CATS[kind].cd);assert.equal(spawn(s,kind),false);assert.equal(s.units[0].max,CATS[kind].hp);assert.ok(s.cooldowns.filter((_,i)=>i!==kind).every(v=>v===0));}});
+test('all eight stacked companions attack without duplicate hits',()=>{const s=fresh();s.wave=STAGES[0].waves.length;s.units=CATS.map((c,kind)=>({id:kind+1,side:0 as const,kind,x:400,hp:c.hp,max:c.hp,cool:0,flash:0}));s.units.push({id:99,side:1,kind:2,x:438,hp:10000,max:10000,cool:100,flash:0});tick(s,.1);assert.equal(s.units.at(-1)!.hp,10000-CATS.reduce((n,c)=>n+c.damage,0));tick(s,.2);assert.equal(s.units.at(-1)!.hp,10000-CATS.reduce((n,c)=>n+c.damage,0));});
+test('large guard requires saving food and friendly population remains capped',()=>{const s=fresh();assert.equal(spawn(s,7),false);s.food=400;assert.equal(spawn(s,7),true);while(s.units.length<24){s.cooldowns[0]=0;s.food=400;assert.equal(spawn(s,0),true);}s.cooldowns[0]=0;s.food=400;assert.equal(spawn(s,0),false);assert.equal(s.food,400);});

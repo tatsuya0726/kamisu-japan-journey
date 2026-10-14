@@ -1,9 +1,9 @@
 export const SAVE_KEY='kamisu.defense.progress.v1';
 export const CATS=[
- {name:'みなとネコ',role:'基本',cost:40,cd:2.5,hp:100,damage:17,range:40,speed:42,attack:0.8},
- {name:'まもりネコ',role:'盾',cost:70,cd:6,hp:360,damage:10,range:38,speed:24,attack:1.2},
- {name:'たねとばし',role:'遠距離',cost:100,cd:7,hp:70,damage:34,range:165,speed:30,attack:1.7},
- {name:'はやてネコ',role:'俊足',cost:65,cd:4,hp:85,damage:24,range:38,speed:75,attack:0.65}
+ {name:'クリーム猫',role:'基本',cost:40,cd:2.5,hp:100,damage:17,range:40,speed:42,attack:0.8},
+ {name:'銀色猫',role:'盾',cost:70,cd:6,hp:360,damage:10,range:38,speed:24,attack:1.2},
+ {name:'農家猫',role:'遠距離',cost:100,cd:7,hp:70,damage:34,range:165,speed:30,attack:1.7},
+ {name:'配達猫',role:'俊足',cost:65,cd:4,hp:85,damage:24,range:38,speed:75,attack:0.65}
 ];
 export const ENEMIES=[
  {name:'いたずらチンピラ',hp:70,damage:10,range:38,speed:29,attack:1.2},
@@ -12,7 +12,7 @@ export const ENEMIES=[
 ];
 export const STAGES=[
  {name:'鹿島港・神栖側',subtitle:'潮風の防衛線',note:'神栖市の北部から東部には鹿島港が広がります。',theme:'port',base:360,income:17,waves:[[5,0],[13,0],[22,0],[30,1],[40,0],[48,0],[57,2],[68,1]]},
- {name:'利根川沿い',subtitle:'川風とねこの作戦',note:'神栖市の西側は、利根川をはさんで千葉県と向き合います。',theme:'river',base:500,income:18,waves:[[4,0],[10,0],[17,1],[24,0],[29,2],[37,1],[45,0],[50,2],[60,1],[70,2]]},
+ {name:'波崎海岸',subtitle:'潮風とねこの作戦',note:'波崎海水浴場は、神栖市波崎にある遠浅の海水浴場です。',theme:'coast',base:500,income:18,waves:[[4,0],[10,0],[17,1],[24,0],[29,2],[37,1],[45,0],[50,2],[60,1],[70,2]]},
  {name:'大野原のまち',subtitle:'みんなの帰る場所',note:'大野原は、神栖市の商業の核となる地区の一つです。',theme:'town',base:650,income:20,waves:[[4,0],[9,1],[17,0],[23,2],[29,1],[36,2],[43,0],[49,1],[57,2],[66,1],[72,2],[80,2]]}
 ];
 export type Unit={id:number,side:0|1,kind:number,x:number,hp:number,max:number,cool:number,flash:number};

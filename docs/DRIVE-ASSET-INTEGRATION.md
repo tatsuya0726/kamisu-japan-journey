@@ -33,4 +33,8 @@ Stage 2 is now 波崎海岸 to match the coast image, retaining stage index and 
 
 Production TypeScript/Vite build and all 29 automated tests pass. Chrome QA records and screenshots are stored in ignored Captures/. Target dimensions are 844×390, 667×375, 1920×1080 and 1280×720, with TV safe margins. No physical phone touchscreen, Safari, television or gamepad hardware test is claimed.
 
+All four sizes passed title/map/team/battle and victory layout checks without document/panel overflow or offscreen buttons. Settings/help were checked at all four sizes; the smallest guide pages passed too. Chrome displayed all four cats and supplied enemy art on the new backgrounds. Final port run won at 55 seconds; Enter restarted with home 650, enemy base 360, food 120, speed 1 and assist OFF. Console error/warning capture was empty. A discovered closed-title CSS visibility bug was fixed and verified with the dialog closed and display:none when returning to battle.
+
+On 2026-10-14 auto-review rejected the candidate-branch GitHub push, stating that it could verify Drive authorization but not explicit GitHub code/asset publication authorization from the trusted messages it saw. No alternate upload route or main push was attempted. Local integration commit is 22f4e4c53f5306deca17bf2da93128a5b1c06275; origin/main remains 2834c80d605120b5f30b93b09e9c6967ff4d5e08. Explicit destination/publication approval is pending; the new art is not yet live.
+
 Sprites are static supplied images with existing movement/bob feedback, not new frame animations. Original PNGs total about 18.1 MB; mobile download optimization and sound remain future work. Publication retains the existing site URL and needs no new account, paid service or permission change.

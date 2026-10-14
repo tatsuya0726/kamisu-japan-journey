@@ -1,0 +1,2089 @@
+{
+  "schema_version": "1.0.0",
+  "game_title": "神栖を守れ！！",
+  "language": "ja",
+  "pack_type": "additive_playable_mission_design",
+  "implementation_status": "content_design_only",
+  "existing_content": {
+    "combat_stages": 3,
+    "smalltalk_scenes": 21,
+    "action": "preserve"
+  },
+  "characters": [
+    {
+      "id": "kiki",
+      "name": "キキ",
+      "appearance": "クリーム色の猫"
+    },
+    {
+      "id": "nene",
+      "name": "ネネ",
+      "appearance": "シルバー色の猫"
+    }
+  ],
+  "emotion_tags": [
+    "normal",
+    "smile",
+    "sleepy",
+    "yawn",
+    "surprised"
+  ],
+  "global_fiction_notice": "すべて架空のゲームストーリーです。実在の施設の事故、迷惑行為、害虫発生、災害の報告ではありません。人物・マスコット・事件は創作です。",
+  "safety_and_tone": [
+    "攻撃演出は猫パンチの風・光・泡・音符。出血、負傷、死亡は描かない。",
+    "HPはいたずらパワーまたは落ち着くまでのゲージ。0になると退却・帰海・静音化。",
+    "ハチに関する行動はゲームの光る花マーカーのみ。現実の駆除・捕獲手順を含めない。",
+    "子どもの実名や容姿を登場させない。学校・園は架空のイベント時間などで演出。",
+    "バイクの相手は架空の大人。現実の個人・団体・地域住民を悪者にしない。",
+    "マスコット3種は完全オリジナルで、既存キャラクターの姿・設定を引用しない。",
+    "港公園の展望塔は閉鎖中という前提を維持し、入場・登塔・塔内ミッションを作らない。",
+    "巨大魚の救出は明確な魔法表現。現実の大型海洋生物へ近づくことや自力で押し戻すことを勧めない。"
+  ],
+  "balance_baseline": {
+    "reference": "通常の既存ザコ敵をHP=1.0、速度=1.0とする相対案。実装前に既存数値へ変換。",
+    "boss_scaling": "巨大イワシは本体1体。攻撃予告を長くし、支援敵を減らす時間を作る。"
+  },
+  "enemies": [
+    {
+      "id": "buzz_bee",
+      "name": "ぶんぶん偵察バチ",
+      "role": "scout",
+      "hp_multiplier": 0.65,
+      "speed_multiplier": 1.45,
+      "visual": "丸い黄色いハチ。小さなゴーグルと、花粉色のほっぺ。",
+      "behavior": "細い列で進み、軽い一撃で後退する。",
+      "peaceful_resolution": "花の道しるべを見つけ、画面外の架空の花畑へ帰る。",
+      "damage_meaning": "HPはげんき・いたずらパワー。0で退却し、死亡や負傷は描かない。"
+    },
+    {
+      "id": "bee_swarm",
+      "name": "ぐるぐるハチ大行列",
+      "role": "swarm",
+      "hp_multiplier": 1.3,
+      "speed_multiplier": 1.15,
+      "visual": "5匹の丸いハチが、ゆるい渦の形で飛ぶ。",
+      "behavior": "先頭が止まると全員ぐるぐる。足止めに弱い。",
+      "peaceful_resolution": "隊列がハート形になり、全員で帰っていく。",
+      "damage_meaning": "HPはげんき・いたずらパワー。0で退却し、死亡や負傷は描かない。"
+    },
+    {
+      "id": "bubble_fish",
+      "name": "ぷくぷく泡さかな",
+      "role": "ranged",
+      "hp_multiplier": 0.85,
+      "speed_multiplier": 0.85,
+      "visual": "泡ヘルメットをかぶった青い魚。ぽってりした唇。",
+      "behavior": "遠くからシャボン玉を飛ばし、猫の動きを少し遅くする。",
+      "peaceful_resolution": "不思議な帰海バブルに入り、海の方向へふわふわ帰る。",
+      "damage_meaning": "HPはげんき・いたずらパワー。0で退却し、死亡や負傷は描かない。"
+    },
+    {
+      "id": "spring_mullet",
+      "name": "ぴょんぴょんボラ",
+      "role": "runner",
+      "hp_multiplier": 0.75,
+      "speed_multiplier": 1.75,
+      "visual": "銀色の魚。尾びれがばねのようにくるんと丸い。",
+      "behavior": "予告マークの後に短いダッシュ。着地時はひと休み。",
+      "peaceful_resolution": "跳びすぎを反省し、帰海バブルの順番を待つ。",
+      "damage_meaning": "HPはげんき・いたずらパワー。0で退却し、死亡や負傷は描かない。"
+    },
+    {
+      "id": "giant_sardine",
+      "name": "どでかイワシ大将",
+      "role": "boss",
+      "hp_multiplier": 9,
+      "speed_multiplier": 0.3,
+      "visual": "砂に乗り上げた青銀色の巨大イワシ。困り眉。",
+      "behavior": "大きなしっぽで砂の波を起こす。体当たりはしない。",
+      "peaceful_resolution": "魔法のふわふわ潮に運ばれ、海で大きくお辞儀する。",
+      "damage_meaning": "HPはげんき・いたずらパワー。0で退却し、死亡や負傷は描かない。"
+    },
+    {
+      "id": "crab_drummer",
+      "name": "カニカニ太鼓団",
+      "role": "support",
+      "hp_multiplier": 1.5,
+      "speed_multiplier": 0.65,
+      "visual": "赤いカニ。貝殻の太鼓を肩から下げ、二本のはさみで演奏。",
+      "behavior": "太鼓で近くの仲間を加速。演奏前に足を止める。",
+      "peaceful_resolution": "音量を下げて、楽しい小さな拍子で退場する。",
+      "damage_meaning": "HPはげんき・いたずらパワー。0で退却し、死亡や負傷は描かない。"
+    },
+    {
+      "id": "wind_kite",
+      "name": "いたずら雲だこ",
+      "role": "flier",
+      "hp_multiplier": 0.7,
+      "speed_multiplier": 1.3,
+      "visual": "白い雲の顔が描かれた紙凧。水色の尾がひらひら。",
+      "behavior": "ふわっと進み、風の予告の後だけ加速する。",
+      "peaceful_resolution": "架空の風ポケットへ戻り、空に笑顔を描く。",
+      "damage_meaning": "HPはげんき・いたずらパワー。0で退却し、死亡や負傷は描かない。"
+    },
+    {
+      "id": "pepper_marun",
+      "name": "ピーマルン",
+      "role": "tank",
+      "hp_multiplier": 3.1,
+      "speed_multiplier": 0.55,
+      "visual": "緑の丸いピーマン妖精。短い手足と葉っぱの帽子。完全オリジナル。",
+      "behavior": "ころころ突進する丈夫な前衛。転がった後に目が回る。",
+      "peaceful_resolution": "応援されるとうれしくなり、行列の案内係になる。",
+      "damage_meaning": "HPはげんき・いたずらパワー。0で退却し、死亡や負傷は描かない。"
+    },
+    {
+      "id": "wave_pukkun",
+      "name": "なみプックン",
+      "role": "disruptor",
+      "hp_multiplier": 2,
+      "speed_multiplier": 0.95,
+      "visual": "青い波頭のついた丸いマスコット。白い泡のほっぺ。完全オリジナル。",
+      "behavior": "泡の道を作り、後ろの敵を少し加速する。",
+      "peaceful_resolution": "小さな波の拍手で謝り、泡の道を消す。",
+      "damage_meaning": "HPはげんき・いたずらパワー。0で退却し、死亡や負傷は描かない。"
+    },
+    {
+      "id": "pine_mokomaru",
+      "name": "まつモコ丸",
+      "role": "blocker",
+      "hp_multiplier": 3.7,
+      "speed_multiplier": 0.45,
+      "visual": "茶色の松ぼっくりの体、緑の冠、眠そうな目。完全オリジナル。",
+      "behavior": "ゆっくり進んで道に居眠り。起床予告の後に再移動。",
+      "peaceful_resolution": "目を覚まして道を空け、指定の休憩場所でお昼寝。",
+      "damage_meaning": "HPはげんき・いたずらパワー。0で退却し、死亡や負傷は描かない。"
+    },
+    {
+      "id": "rattle_rider",
+      "name": "ガタゴトライダー",
+      "role": "runner",
+      "hp_multiplier": 1.4,
+      "speed_multiplier": 1.5,
+      "visual": "大人のライダー。顔が見えるヘルメットと、玩具のような小さなバイク。",
+      "behavior": "ガタゴト音とともに走る。減速マークで一時停止する。",
+      "peaceful_resolution": "音の出る飾りを外し、エンジンを止めて押して帰る。",
+      "damage_meaning": "HPはげんき・いたずらパワー。0で退却し、死亡や負傷は描かない。"
+    },
+    {
+      "id": "can_robot",
+      "name": "カラカンロボ",
+      "role": "collector",
+      "hp_multiplier": 2.3,
+      "speed_multiplier": 0.75,
+      "visual": "銀色の空き缶風ロボ。磁石の手と左右ちがう丸い目。",
+      "behavior": "磁石の予告後に落ち葉や缶を集め、ちょっと丈夫になる。",
+      "peaceful_resolution": "回収モードの向きを直し、散らかった道を片づける。",
+      "damage_meaning": "HPはげんき・いたずらパワー。0で退却し、死亡や負傷は描かない。"
+    }
+  ],
+  "missions": [
+    {
+      "id": "thousand_people_gallery_ex_01",
+      "location_id": "thousand_people_gallery",
+      "location": "1000人画廊",
+      "title": "壁画をまねする泡の顔",
+      "content_type": "playable_mission",
+      "status": "proposed_not_implemented",
+      "fiction_notice": "実在の場所を舞台にした架空のゲーム事件です。実際の出来事・施設の状況を示すものではありません。",
+      "premise": "なみプックンが壁画を見て張り切り、泡の顔で道をいっぱいにした。",
+      "objective": "鑑賞ルートのゲートを3ウェーブ守る。",
+      "enemy_ids": [
+        "wave_pukkun",
+        "bubble_fish"
+      ],
+      "wave_concept": "泡魚4体→波前衛2体→両者の交互隊列。",
+      "difficulty": "easy",
+      "introduction": [
+        {
+          "speaker": "キキ",
+          "emotion": "surprised",
+          "text": "絵の前に、もう一つお顔がある！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "normal",
+          "text": "作品に触らず、通れる道を残そう。"
+        }
+      ],
+      "outro": [
+        {
+          "speaker": "キキ",
+          "emotion": "smile",
+          "text": "泡の展示は空の上へ移動した！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "smile",
+          "text": "本物の壁画がよく見えるね。"
+        }
+      ],
+      "implementation_notes": [
+        "既存の3戦闘ステージ・21小話を上書きしない追加ミッション。",
+        "会話の追加だけでは実装済みに数えない。敵配置・勝敗条件・報酬を接続してから公開。"
+      ]
+    },
+    {
+      "id": "thousand_people_gallery_ex_02",
+      "location_id": "thousand_people_gallery",
+      "location": "1000人画廊",
+      "title": "風のギャラリー大脱走",
+      "content_type": "playable_mission",
+      "status": "proposed_not_implemented",
+      "fiction_notice": "実在の場所を舞台にした架空のゲーム事件です。実際の出来事・施設の状況を示すものではありません。",
+      "premise": "架空の雲だこ展示が風に乗って飛び出し、道の端へ流れていく。",
+      "objective": "飛行敵20体の進入を防ぐ。",
+      "enemy_ids": [
+        "wind_kite",
+        "buzz_bee"
+      ],
+      "wave_concept": "凧5体ずつ4組、組の合間に少数のハチ。",
+      "difficulty": "normal",
+      "introduction": [
+        {
+          "speaker": "キキ",
+          "emotion": "normal",
+          "text": "展示に足はないのに、逃げるのが速い！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "normal",
+          "text": "尾っぽの風予告を見て配置しよう。"
+        }
+      ],
+      "outro": [
+        {
+          "speaker": "キキ",
+          "emotion": "smile",
+          "text": "みんな風ポケットへ戻った！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "smile",
+          "text": "展示名は、ちょっと元気すぎる空。"
+        }
+      ],
+      "implementation_notes": [
+        "既存の3戦闘ステージ・21小話を上書きしない追加ミッション。",
+        "会話の追加だけでは実装済みに数えない。敵配置・勝敗条件・報酬を接続してから公開。"
+      ]
+    },
+    {
+      "id": "thousand_people_gallery_ex_03",
+      "location_id": "thousand_people_gallery",
+      "location": "1000人画廊",
+      "title": "カニ画伯のドンドコ批評",
+      "content_type": "playable_mission",
+      "status": "proposed_not_implemented",
+      "fiction_notice": "実在の場所を舞台にした架空のゲーム事件です。実際の出来事・施設の状況を示すものではありません。",
+      "premise": "カニ画伯は感想を全部太鼓で伝え、静かに見る時間がなくなった。",
+      "objective": "太鼓役5体を落ち着かせるまで作品前の道を守る。",
+      "enemy_ids": [
+        "crab_drummer",
+        "pepper_marun"
+      ],
+      "wave_concept": "太鼓1体→丈夫な前衛→太鼓2体ずつの二段編成。",
+      "difficulty": "normal",
+      "introduction": [
+        {
+          "speaker": "キキ",
+          "emotion": "surprised",
+          "text": "感想がドン！ しかわからないよ！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "normal",
+          "text": "拍手一回でも、好きは伝わるよ。"
+        }
+      ],
+      "outro": [
+        {
+          "speaker": "キキ",
+          "emotion": "smile",
+          "text": "小さな拍手で、いいね！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "smile",
+          "text": "カニ画伯の新作は、静かな余韻。"
+        }
+      ],
+      "implementation_notes": [
+        "既存の3戦闘ステージ・21小話を上書きしない追加ミッション。",
+        "会話の追加だけでは実装済みに数えない。敵配置・勝敗条件・報酬を接続してから公開。"
+      ]
+    },
+    {
+      "id": "thousand_people_gallery_ex_04",
+      "location_id": "thousand_people_gallery",
+      "location": "1000人画廊",
+      "title": "銀色の跳ねる額ぶち",
+      "content_type": "playable_mission",
+      "status": "proposed_not_implemented",
+      "fiction_notice": "実在の場所を舞台にした架空のゲーム事件です。実際の出来事・施設の状況を示すものではありません。",
+      "premise": "跳ねボラが架空の空っぽ額ぶちをくぐり、道を競走コースにした。",
+      "objective": "額ぶちゲートを50秒守る。",
+      "enemy_ids": [
+        "spring_mullet",
+        "can_robot"
+      ],
+      "wave_concept": "ボラ速攻→ロボで進路が詰まる→左右間隔を変えたボラ列。",
+      "difficulty": "normal",
+      "introduction": [
+        {
+          "speaker": "キキ",
+          "emotion": "normal",
+          "text": "額ぶちは輪っか競走の道具じゃないよ！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "normal",
+          "text": "着地する場所を見て、順番を整えよう。"
+        }
+      ],
+      "outro": [
+        {
+          "speaker": "キキ",
+          "emotion": "smile",
+          "text": "最後はみんな額ぶちの外で記念ポーズ！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "smile",
+          "text": "海に帰る前の、一枚だね。"
+        }
+      ],
+      "implementation_notes": [
+        "既存の3戦闘ステージ・21小話を上書きしない追加ミッション。",
+        "会話の追加だけでは実装済みに数えない。敵配置・勝敗条件・報酬を接続してから公開。"
+      ]
+    },
+    {
+      "id": "thousand_people_gallery_ex_05",
+      "location_id": "thousand_people_gallery",
+      "location": "1000人画廊",
+      "title": "ピーマン色の一人展",
+      "content_type": "playable_mission",
+      "status": "proposed_not_implemented",
+      "fiction_notice": "実在の場所を舞台にした架空のゲーム事件です。実際の出来事・施設の状況を示すものではありません。",
+      "premise": "ピーマルンが自分の緑色を紹介したくて、鑑賞ルートでくるくる転がる。",
+      "objective": "前衛5体を退却させ、歩ける幅を取り戻す。",
+      "enemy_ids": [
+        "pepper_marun",
+        "pine_mokomaru"
+      ],
+      "wave_concept": "緑前衛2体→眠り前衛の壁→緑前衛3体。",
+      "difficulty": "hard",
+      "introduction": [
+        {
+          "speaker": "キキ",
+          "emotion": "surprised",
+          "text": "展示タイトルは、ぜんぶピーマルン！？"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "normal",
+          "text": "いい色だね。でも転がらないで見せよう。"
+        }
+      ],
+      "outro": [
+        {
+          "speaker": "キキ",
+          "emotion": "smile",
+          "text": "止まってポーズ、上手にできた！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "smile",
+          "text": "展示説明も一行になったよ。"
+        }
+      ],
+      "implementation_notes": [
+        "既存の3戦闘ステージ・21小話を上書きしない追加ミッション。",
+        "会話の追加だけでは実装済みに数えない。敵配置・勝敗条件・報酬を接続してから公開。"
+      ]
+    },
+    {
+      "id": "thousand_people_gallery_ex_06",
+      "location_id": "thousand_people_gallery",
+      "location": "1000人画廊",
+      "title": "どでかイワシの海辺展",
+      "content_type": "playable_mission",
+      "status": "proposed_not_implemented",
+      "fiction_notice": "実在の場所を舞台にした架空のゲーム事件です。実際の出来事・施設の状況を示すものではありません。",
+      "premise": "架空の不思議な潮で巨大イワシが海辺に乗り上げ、困ってしっぽを振っている。",
+      "objective": "帰海パワーを満たすためボスのいたずらHPを0にし、ゲートを守る。",
+      "enemy_ids": [
+        "giant_sardine",
+        "bubble_fish",
+        "crab_drummer"
+      ],
+      "wave_concept": "泡魚の前座→巨大イワシ1体→ボスHP半分で太鼓2体。",
+      "difficulty": "boss",
+      "introduction": [
+        {
+          "speaker": "キキ",
+          "emotion": "normal",
+          "text": "海よりこっちに来すぎちゃったんだね！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "normal",
+          "text": "近づいて押さないよ。ゲームの帰海パワーをためよう。"
+        }
+      ],
+      "outro": [
+        {
+          "speaker": "キキ",
+          "emotion": "smile",
+          "text": "ふわふわ潮で、海へおかえり！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "smile",
+          "text": "現実の大きな生き物は近づかず、管理者に知らせよう。"
+        }
+      ],
+      "implementation_notes": [
+        "既存の3戦闘ステージ・21小話を上書きしない追加ミッション。",
+        "会話の追加だけでは実装済みに数えない。敵配置・勝敗条件・報酬を接続してから公開。"
+      ]
+    },
+    {
+      "id": "kamisu_central_park_ex_01",
+      "location_id": "kamisu_central_park",
+      "location": "神栖中央公園",
+      "title": "芝生のぐるぐる追いかけっこ",
+      "content_type": "playable_mission",
+      "status": "proposed_not_implemented",
+      "fiction_notice": "実在の場所を舞台にした架空のゲーム事件です。実際の出来事・施設の状況を示すものではありません。",
+      "premise": "ピーマルンとなみプックンが架空の追いかけっこに夢中で出口を見失った。",
+      "objective": "公園ゲートを3ウェーブ守る。",
+      "enemy_ids": [
+        "pepper_marun",
+        "wave_pukkun"
+      ],
+      "wave_concept": "緑前衛→波前衛→波が緑を加速させる混成列。",
+      "difficulty": "easy",
+      "introduction": [
+        {
+          "speaker": "キキ",
+          "emotion": "surprised",
+          "text": "その追いかけっこ、もう十周！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "normal",
+          "text": "休憩の看板まで競走しよう。ゆっくりね。"
+        }
+      ],
+      "outro": [
+        {
+          "speaker": "キキ",
+          "emotion": "smile",
+          "text": "水分休憩に集合できた！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "smile",
+          "text": "競走の勝者は、休憩の大切さでした。"
+        }
+      ],
+      "implementation_notes": [
+        "既存の3戦闘ステージ・21小話を上書きしない追加ミッション。",
+        "会話の追加だけでは実装済みに数えない。敵配置・勝敗条件・報酬を接続してから公開。"
+      ]
+    },
+    {
+      "id": "kamisu_central_park_ex_02",
+      "location_id": "kamisu_central_park",
+      "location": "神栖中央公園",
+      "title": "お弁当のにおいとぶんぶん隊",
+      "content_type": "playable_mission",
+      "status": "proposed_not_implemented",
+      "fiction_notice": "実在の場所を舞台にした架空のゲーム事件です。実際の出来事・施設の状況を示すものではありません。",
+      "premise": "ハチたちが架空のお花型ランチ看板を花と勘違いして集まった。",
+      "objective": "看板ゲートを45秒守り、花マーカーを完成させる。",
+      "enemy_ids": [
+        "buzz_bee",
+        "bee_swarm"
+      ],
+      "wave_concept": "偵察連続→群れの短い山場→最後は偵察の小列。",
+      "difficulty": "normal",
+      "introduction": [
+        {
+          "speaker": "キキ",
+          "emotion": "normal",
+          "text": "そのお花、食べ物の絵だよ！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "normal",
+          "text": "ゲームの花の道へ案内しよう。現実なら距離を取ってね。"
+        }
+      ],
+      "outro": [
+        {
+          "speaker": "キキ",
+          "emotion": "smile",
+          "text": "ちゃんと花のほうへ帰れたね！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "smile",
+          "text": "ランチ看板は、あとで大人が確認するよ。"
+        }
+      ],
+      "implementation_notes": [
+        "既存の3戦闘ステージ・21小話を上書きしない追加ミッション。",
+        "会話の追加だけでは実装済みに数えない。敵配置・勝敗条件・報酬を接続してから公開。"
+      ]
+    },
+    {
+      "id": "kamisu_central_park_ex_03",
+      "location_id": "kamisu_central_park",
+      "location": "神栖中央公園",
+      "title": "お昼寝名人の大移動",
+      "content_type": "playable_mission",
+      "status": "proposed_not_implemented",
+      "fiction_notice": "実在の場所を舞台にした架空のゲーム事件です。実際の出来事・施設の状況を示すものではありません。",
+      "premise": "まつモコ丸たちが気持ちよさそうなベンチを探し、通り道で行列になった。",
+      "objective": "眠り前衛6体を安全な休憩場所へ見送る。",
+      "enemy_ids": [
+        "pine_mokomaru",
+        "wind_kite"
+      ],
+      "wave_concept": "前衛2体→凧の高速隊→前衛2体ずつの二組。",
+      "difficulty": "normal",
+      "introduction": [
+        {
+          "speaker": "キキ",
+          "emotion": "surprised",
+          "text": "ベンチを探して、道で寝ちゃった！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "normal",
+          "text": "眠いときほど、休む場所を決めよう。"
+        }
+      ],
+      "outro": [
+        {
+          "speaker": "キキ",
+          "emotion": "smile",
+          "text": "木陰の休憩スペースに到着！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "smile",
+          "text": "ぼくも、ちょっとだけ……まだ次がある？"
+        }
+      ],
+      "implementation_notes": [
+        "既存の3戦闘ステージ・21小話を上書きしない追加ミッション。",
+        "会話の追加だけでは実装済みに数えない。敵配置・勝敗条件・報酬を接続してから公開。"
+      ]
+    },
+    {
+      "id": "kamisu_central_park_ex_04",
+      "location_id": "kamisu_central_park",
+      "location": "神栖中央公園",
+      "title": "ロボの落ち葉コレクション",
+      "content_type": "playable_mission",
+      "status": "proposed_not_implemented",
+      "fiction_notice": "実在の場所を舞台にした架空のゲーム事件です。実際の出来事・施設の状況を示すものではありません。",
+      "premise": "カラカンロボが落ち葉を全部自分の帽子にして、巨大な山になった。",
+      "objective": "掃除ステーションを守り、ロボ6体を戻す。",
+      "enemy_ids": [
+        "can_robot",
+        "pepper_marun"
+      ],
+      "wave_concept": "ロボ2体→緑前衛1体→ロボ4体が短い間隔で到着。",
+      "difficulty": "normal",
+      "introduction": [
+        {
+          "speaker": "キキ",
+          "emotion": "normal",
+          "text": "帽子が木みたいになってる！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "normal",
+          "text": "集めた葉っぱは、決まった箱へ。"
+        }
+      ],
+      "outro": [
+        {
+          "speaker": "キキ",
+          "emotion": "smile",
+          "text": "ロボの帽子も道も、すっきり！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "smile",
+          "text": "一枚だけ残した帽子、似合ってるね。"
+        }
+      ],
+      "implementation_notes": [
+        "既存の3戦闘ステージ・21小話を上書きしない追加ミッション。",
+        "会話の追加だけでは実装済みに数えない。敵配置・勝敗条件・報酬を接続してから公開。"
+      ]
+    },
+    {
+      "id": "kamisu_central_park_ex_05",
+      "location_id": "kamisu_central_park",
+      "location": "神栖中央公園",
+      "title": "ガタゴト周回ストップ",
+      "content_type": "playable_mission",
+      "status": "proposed_not_implemented",
+      "fiction_notice": "実在の場所を舞台にした架空のゲーム事件です。実際の出来事・施設の状況を示すものではありません。",
+      "premise": "架空の大人ライダーが公園外周を何度も騒がしく回っている。",
+      "objective": "ゲートを60秒守り、6回の速攻を止める。",
+      "enemy_ids": [
+        "rattle_rider",
+        "crab_drummer"
+      ],
+      "wave_concept": "10秒ごとにライダー小隊、30秒時点に太鼓役を追加。",
+      "difficulty": "hard",
+      "introduction": [
+        {
+          "speaker": "キキ",
+          "emotion": "surprised",
+          "text": "音だけ先に、また一周来た！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "normal",
+          "text": "速攻の前に、減速するタイミングを見よう。"
+        }
+      ],
+      "outro": [
+        {
+          "speaker": "キキ",
+          "emotion": "smile",
+          "text": "バイクを降りて、押して帰るって！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "smile",
+          "text": "静かになると、風の音が聞こえるね。"
+        }
+      ],
+      "implementation_notes": [
+        "既存の3戦闘ステージ・21小話を上書きしない追加ミッション。",
+        "会話の追加だけでは実装済みに数えない。敵配置・勝敗条件・報酬を接続してから公開。"
+      ]
+    },
+    {
+      "id": "kamisu_central_park_ex_06",
+      "location_id": "kamisu_central_park",
+      "location": "神栖中央公園",
+      "title": "公園オールスター大渋滞",
+      "content_type": "playable_mission",
+      "status": "proposed_not_implemented",
+      "fiction_notice": "実在の場所を舞台にした架空のゲーム事件です。実際の出来事・施設の状況を示すものではありません。",
+      "premise": "架空のマスコット祭りで、全員が最前列に出たがってしまった。",
+      "objective": "5ウェーブの混成隊を防ぎ、案内ゲートを保つ。",
+      "enemy_ids": [
+        "pepper_marun",
+        "wave_pukkun",
+        "pine_mokomaru",
+        "can_robot"
+      ],
+      "wave_concept": "緑→波→松→ロボ→4種の時間差フィナーレ。",
+      "difficulty": "hard",
+      "introduction": [
+        {
+          "speaker": "キキ",
+          "emotion": "normal",
+          "text": "全員主役で、前に進めないよ！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "normal",
+          "text": "主役は順番。一列ずつ見せ場を作ろう。"
+        }
+      ],
+      "outro": [
+        {
+          "speaker": "キキ",
+          "emotion": "smile",
+          "text": "最後はきれいに横一列！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "smile",
+          "text": "記念写真の声かけは、はい、ピーマン。"
+        }
+      ],
+      "implementation_notes": [
+        "既存の3戦闘ステージ・21小話を上書きしない追加ミッション。",
+        "会話の追加だけでは実装済みに数えない。敵配置・勝敗条件・報酬を接続してから公開。"
+      ]
+    },
+    {
+      "id": "kamisu_disaster_arena_ex_01",
+      "location_id": "kamisu_disaster_arena",
+      "location": "かみす防災アリーナ",
+      "title": "入口案内ロボが大混乱",
+      "content_type": "playable_mission",
+      "status": "proposed_not_implemented",
+      "fiction_notice": "実在の場所を舞台にした架空のゲーム事件です。実際の出来事・施設の状況を示すものではありません。",
+      "premise": "架空のゲームイベントで、案内ロボの矢印が全部同じ方向を向いた。",
+      "objective": "入口案内ゲートを3ウェーブ守る。",
+      "enemy_ids": [
+        "can_robot",
+        "wind_kite"
+      ],
+      "wave_concept": "ロボ2体→凧4体→ロボ3体と凧の混成。",
+      "difficulty": "easy",
+      "introduction": [
+        {
+          "speaker": "キキ",
+          "emotion": "surprised",
+          "text": "右も左も、ぜんぶこっち！？"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "normal",
+          "text": "案内表示を一つずつ確かめよう。"
+        }
+      ],
+      "outro": [
+        {
+          "speaker": "キキ",
+          "emotion": "smile",
+          "text": "矢印がきちんとそろった！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "smile",
+          "text": "本当の災害情報ではなく、ゲームのイベントだよ。"
+        }
+      ],
+      "implementation_notes": [
+        "既存の3戦闘ステージ・21小話を上書きしない追加ミッション。",
+        "会話の追加だけでは実装済みに数えない。敵配置・勝敗条件・報酬を接続してから公開。"
+      ]
+    },
+    {
+      "id": "kamisu_disaster_arena_ex_02",
+      "location_id": "kamisu_disaster_arena",
+      "location": "かみす防災アリーナ",
+      "title": "点呼はドンドコじゃ聞こえない",
+      "content_type": "playable_mission",
+      "status": "proposed_not_implemented",
+      "fiction_notice": "実在の場所を舞台にした架空のゲーム事件です。実際の出来事・施設の状況を示すものではありません。",
+      "premise": "架空の練習イベントで、太鼓隊が集合の声をかき消している。",
+      "objective": "集合ゲートを守り、太鼓役6体を落ち着かせる。",
+      "enemy_ids": [
+        "crab_drummer",
+        "buzz_bee"
+      ],
+      "wave_concept": "太鼓2体→ハチ小隊→太鼓2体ずつの二連戦。",
+      "difficulty": "normal",
+      "introduction": [
+        {
+          "speaker": "キキ",
+          "emotion": "normal",
+          "text": "お返事がぜんぶドンドコになっちゃう！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "normal",
+          "text": "合図が聞こえる音量にしてもらおう。"
+        }
+      ],
+      "outro": [
+        {
+          "speaker": "キキ",
+          "emotion": "smile",
+          "text": "名前の代わりに、番号で点呼完了！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "smile",
+          "text": "一人ずつのお返事なら、よく聞こえるね。"
+        }
+      ],
+      "implementation_notes": [
+        "既存の3戦闘ステージ・21小話を上書きしない追加ミッション。",
+        "会話の追加だけでは実装済みに数えない。敵配置・勝敗条件・報酬を接続してから公開。"
+      ]
+    },
+    {
+      "id": "kamisu_disaster_arena_ex_03",
+      "location_id": "kamisu_disaster_arena",
+      "location": "かみす防災アリーナ",
+      "title": "備品じゃないよピーマルン",
+      "content_type": "playable_mission",
+      "status": "proposed_not_implemented",
+      "fiction_notice": "実在の場所を舞台にした架空のゲーム事件です。実際の出来事・施設の状況を示すものではありません。",
+      "premise": "ピーマルンが丸いボール箱を自分の休憩所と思って押しかけた。",
+      "objective": "備品ゲートを守り、前衛5体を案内する。",
+      "enemy_ids": [
+        "pepper_marun",
+        "pine_mokomaru"
+      ],
+      "wave_concept": "緑2体→松1体→緑3体のゆっくり重い列。",
+      "difficulty": "normal",
+      "introduction": [
+        {
+          "speaker": "キキ",
+          "emotion": "surprised",
+          "text": "ボールに葉っぱは生えないよ！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "normal",
+          "text": "休憩スペースは、別に用意しよう。"
+        }
+      ],
+      "outro": [
+        {
+          "speaker": "キキ",
+          "emotion": "smile",
+          "text": "箱もマスコットも、正しい場所に！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "smile",
+          "text": "ピーマルン、ボールのふりはやめたみたい。"
+        }
+      ],
+      "implementation_notes": [
+        "既存の3戦闘ステージ・21小話を上書きしない追加ミッション。",
+        "会話の追加だけでは実装済みに数えない。敵配置・勝敗条件・報酬を接続してから公開。"
+      ]
+    },
+    {
+      "id": "kamisu_disaster_arena_ex_04",
+      "location_id": "kamisu_disaster_arena",
+      "location": "かみす防災アリーナ",
+      "title": "跳ね魚スーパーダッシュ",
+      "content_type": "playable_mission",
+      "status": "proposed_not_implemented",
+      "fiction_notice": "実在の場所を舞台にした架空のゲーム事件です。実際の出来事・施設の状況を示すものではありません。",
+      "premise": "架空のゲーム体験コーナーから、光る跳ね魚が飛び出してきた。",
+      "objective": "速攻4ウェーブを守り、魚を帰海バブルへ送る。",
+      "enemy_ids": [
+        "spring_mullet",
+        "bubble_fish"
+      ],
+      "wave_concept": "ボラ4体→泡魚2体→ボラ6体→泡魚とボラの連続列。",
+      "difficulty": "normal",
+      "introduction": [
+        {
+          "speaker": "キキ",
+          "emotion": "normal",
+          "text": "コースの外まで、新記録！？"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "normal",
+          "text": "記録より、止まる場所が大事だよ。"
+        }
+      ],
+      "outro": [
+        {
+          "speaker": "キキ",
+          "emotion": "smile",
+          "text": "フィニッシュは帰海バブル！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "smile",
+          "text": "全員完走、全員帰海。いい結果だね。"
+        }
+      ],
+      "implementation_notes": [
+        "既存の3戦闘ステージ・21小話を上書きしない追加ミッション。",
+        "会話の追加だけでは実装済みに数えない。敵配置・勝敗条件・報酬を接続してから公開。"
+      ]
+    },
+    {
+      "id": "kamisu_disaster_arena_ex_05",
+      "location_id": "kamisu_disaster_arena",
+      "location": "かみす防災アリーナ",
+      "title": "泡まみれの案内板",
+      "content_type": "playable_mission",
+      "status": "proposed_not_implemented",
+      "fiction_notice": "実在の場所を舞台にした架空のゲーム事件です。実際の出来事・施設の状況を示すものではありません。",
+      "premise": "なみプックンが架空の案内板を磨こうとして、泡を出しすぎた。",
+      "objective": "案内板ゲートを55秒守る。",
+      "enemy_ids": [
+        "wave_pukkun",
+        "can_robot"
+      ],
+      "wave_concept": "波1体→ロボ2体→20秒ごとに波とロボのセット。",
+      "difficulty": "hard",
+      "introduction": [
+        {
+          "speaker": "キキ",
+          "emotion": "surprised",
+          "text": "ぴかぴかのはずが、文字が見えない！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "normal",
+          "text": "泡の道ができたら、速い列に注意して。"
+        }
+      ],
+      "outro": [
+        {
+          "speaker": "キキ",
+          "emotion": "smile",
+          "text": "文字がくっきり、道もすっきり！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "smile",
+          "text": "泡の量は、次から少なめで。"
+        }
+      ],
+      "implementation_notes": [
+        "既存の3戦闘ステージ・21小話を上書きしない追加ミッション。",
+        "会話の追加だけでは実装済みに数えない。敵配置・勝敗条件・報酬を接続してから公開。"
+      ]
+    },
+    {
+      "id": "kamisu_disaster_arena_ex_06",
+      "location_id": "kamisu_disaster_arena",
+      "location": "かみす防災アリーナ",
+      "title": "みんなで整列ファイナル",
+      "content_type": "playable_mission",
+      "status": "proposed_not_implemented",
+      "fiction_notice": "実在の場所を舞台にした架空のゲーム事件です。実際の出来事・施設の状況を示すものではありません。",
+      "premise": "イベント終了後、マスコットと太鼓隊が出口で逆向きに行進を始めた。",
+      "objective": "5ウェーブを防ぎ、最後の隊列を整える。",
+      "enemy_ids": [
+        "crab_drummer",
+        "pepper_marun",
+        "wave_pukkun",
+        "can_robot"
+      ],
+      "wave_concept": "太鼓→緑前衛→ロボ→波の加速列→4種混成。",
+      "difficulty": "hard",
+      "introduction": [
+        {
+          "speaker": "キキ",
+          "emotion": "normal",
+          "text": "出口で入場行進しちゃってる！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "normal",
+          "text": "落ち着いて向きをそろえよう。道はふさがない。"
+        }
+      ],
+      "outro": [
+        {
+          "speaker": "キキ",
+          "emotion": "smile",
+          "text": "行列がすいすい流れた！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "smile",
+          "text": "ゲームの大作戦、大成功。現実の避難は係員の案内に従おう。"
+        }
+      ],
+      "implementation_notes": [
+        "既存の3戦闘ステージ・21小話を上書きしない追加ミッション。",
+        "会話の追加だけでは実装済みに数えない。敵配置・勝敗条件・報酬を接続してから公開。"
+      ]
+    },
+    {
+      "id": "minato_park_ex_01",
+      "location_id": "minato_park",
+      "location": "港公園",
+      "title": "地上で風だこ大騒ぎ",
+      "content_type": "playable_mission",
+      "status": "proposed_not_implemented",
+      "fiction_notice": "実在の場所を舞台にした架空のゲーム事件です。実際の出来事・施設の状況を示すものではありません。",
+      "premise": "公園の地上エリアで雲だこが風を集めすぎ、遊歩道へふわふわ集まった。",
+      "objective": "地上の公園ゲートを3ウェーブ守る。",
+      "enemy_ids": [
+        "wind_kite",
+        "buzz_bee"
+      ],
+      "wave_concept": "凧4体→ハチ6体→凧6体の時間差速攻。",
+      "difficulty": "easy",
+      "introduction": [
+        {
+          "speaker": "キキ",
+          "emotion": "surprised",
+          "text": "高いところじゃなくても、風がいっぱい！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "normal",
+          "text": "塔には入らず、地上のコースで進めよう。"
+        }
+      ],
+      "outro": [
+        {
+          "speaker": "キキ",
+          "emotion": "smile",
+          "text": "風だこが空の道へ戻った！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "smile",
+          "text": "地上だけでも、いい冒険だったね。"
+        }
+      ],
+      "implementation_notes": [
+        "既存の3戦闘ステージ・21小話を上書きしない追加ミッション。",
+        "会話の追加だけでは実装済みに数えない。敵配置・勝敗条件・報酬を接続してから公開。",
+        "タワー入場や塔内探索なし。全戦闘・会話は公園の地上エリア。"
+      ]
+    },
+    {
+      "id": "minato_park_ex_02",
+      "location_id": "minato_park",
+      "location": "港公園",
+      "title": "波打ちぎわの太鼓大会",
+      "content_type": "playable_mission",
+      "status": "proposed_not_implemented",
+      "fiction_notice": "実在の場所を舞台にした架空のゲーム事件です。実際の出来事・施設の状況を示すものではありません。",
+      "premise": "架空のカニたちが太鼓大会を始め、魚の行列が遊歩道へ向かった。",
+      "objective": "地上ゲートを守り、太鼓役4体を落ち着かせる。",
+      "enemy_ids": [
+        "crab_drummer",
+        "bubble_fish"
+      ],
+      "wave_concept": "太鼓1体→泡魚列→太鼓3体を間隔を空けて追加。",
+      "difficulty": "normal",
+      "introduction": [
+        {
+          "speaker": "キキ",
+          "emotion": "normal",
+          "text": "魚のお客さん、海の席はこちら！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "normal",
+          "text": "小さな音で、帰る合図をお願いしよう。"
+        }
+      ],
+      "outro": [
+        {
+          "speaker": "キキ",
+          "emotion": "smile",
+          "text": "太鼓に合わせて、海へ行進！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "smile",
+          "text": "海の中では、拍手も泡になるのかな。"
+        }
+      ],
+      "implementation_notes": [
+        "既存の3戦闘ステージ・21小話を上書きしない追加ミッション。",
+        "会話の追加だけでは実装済みに数えない。敵配置・勝敗条件・報酬を接続してから公開。",
+        "タワー入場や塔内探索なし。全戦闘・会話は公園の地上エリア。"
+      ]
+    },
+    {
+      "id": "minato_park_ex_03",
+      "location_id": "minato_park",
+      "location": "港公園",
+      "title": "跳びすぎボラの着地待ち",
+      "content_type": "playable_mission",
+      "status": "proposed_not_implemented",
+      "fiction_notice": "実在の場所を舞台にした架空のゲーム事件です。実際の出来事・施設の状況を示すものではありません。",
+      "premise": "跳ねボラが不思議な風で陸まで来てしまい、帰る方向を探している。",
+      "objective": "帰海バブルが開くまで50秒守る。",
+      "enemy_ids": [
+        "spring_mullet",
+        "wave_pukkun"
+      ],
+      "wave_concept": "ボラ小隊→波の加速役→ボラ密集→最後に休憩間隔。",
+      "difficulty": "normal",
+      "introduction": [
+        {
+          "speaker": "キキ",
+          "emotion": "surprised",
+          "text": "ジャンプの続きは、海でやろう！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "normal",
+          "text": "急ぐ魚ほど、着地の休みに注目。"
+        }
+      ],
+      "outro": [
+        {
+          "speaker": "キキ",
+          "emotion": "smile",
+          "text": "帰海バブルの便、満員で出発！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "smile",
+          "text": "みんな無事に海へ帰ったね。"
+        }
+      ],
+      "implementation_notes": [
+        "既存の3戦闘ステージ・21小話を上書きしない追加ミッション。",
+        "会話の追加だけでは実装済みに数えない。敵配置・勝敗条件・報酬を接続してから公開。",
+        "タワー入場や塔内探索なし。全戦闘・会話は公園の地上エリア。"
+      ]
+    },
+    {
+      "id": "minato_park_ex_04",
+      "location_id": "minato_park",
+      "location": "港公園",
+      "title": "松ぼっくりの港見物",
+      "content_type": "playable_mission",
+      "status": "proposed_not_implemented",
+      "fiction_notice": "実在の場所を舞台にした架空のゲーム事件です。実際の出来事・施設の状況を示すものではありません。",
+      "premise": "まつモコ丸が地上から景色を見ようとして、遊歩道の真ん中で眠った。",
+      "objective": "公園ゲートを守り、眠り前衛5体を案内する。",
+      "enemy_ids": [
+        "pine_mokomaru",
+        "can_robot"
+      ],
+      "wave_concept": "松1体→ロボ2体→松2体ずつの二隊列。",
+      "difficulty": "normal",
+      "introduction": [
+        {
+          "speaker": "キキ",
+          "emotion": "normal",
+          "text": "景色を見る前に、夢を見てる！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "normal",
+          "text": "閉まっている塔へは行かず、地上で休もう。"
+        }
+      ],
+      "outro": [
+        {
+          "speaker": "キキ",
+          "emotion": "smile",
+          "text": "通路の外の休憩場所に到着！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "smile",
+          "text": "景色は起きてから、ゆっくりね。"
+        }
+      ],
+      "implementation_notes": [
+        "既存の3戦闘ステージ・21小話を上書きしない追加ミッション。",
+        "会話の追加だけでは実装済みに数えない。敵配置・勝敗条件・報酬を接続してから公開。",
+        "タワー入場や塔内探索なし。全戦闘・会話は公園の地上エリア。"
+      ]
+    },
+    {
+      "id": "minato_park_ex_05",
+      "location_id": "minato_park",
+      "location": "港公園",
+      "title": "港のガタゴト大合奏",
+      "content_type": "playable_mission",
+      "status": "proposed_not_implemented",
+      "fiction_notice": "実在の場所を舞台にした架空のゲーム事件です。実際の出来事・施設の状況を示すものではありません。",
+      "premise": "架空のライダーとカニ太鼓が張り合い、公園の入口で音が大きくなった。",
+      "objective": "4ウェーブを防ぎ、地上の静けさを取り戻す。",
+      "enemy_ids": [
+        "rattle_rider",
+        "crab_drummer",
+        "can_robot"
+      ],
+      "wave_concept": "ライダー2体→太鼓護衛→ロボ2体→ライダーと太鼓の最終列。",
+      "difficulty": "hard",
+      "introduction": [
+        {
+          "speaker": "キキ",
+          "emotion": "surprised",
+          "text": "大きい音の一等賞は、もうおしまい！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "normal",
+          "text": "止まって話せば、小さい声で十分だよ。"
+        }
+      ],
+      "outro": [
+        {
+          "speaker": "キキ",
+          "emotion": "smile",
+          "text": "ライダーは押して、カニは静かに帰った！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "smile",
+          "text": "静けさの一等賞は、みんな一緒。"
+        }
+      ],
+      "implementation_notes": [
+        "既存の3戦闘ステージ・21小話を上書きしない追加ミッション。",
+        "会話の追加だけでは実装済みに数えない。敵配置・勝敗条件・報酬を接続してから公開。",
+        "タワー入場や塔内探索なし。全戦闘・会話は公園の地上エリア。"
+      ]
+    },
+    {
+      "id": "minato_park_ex_06",
+      "location_id": "minato_park",
+      "location": "港公園",
+      "title": "海へおかえりイワシ大将",
+      "content_type": "playable_mission",
+      "status": "proposed_not_implemented",
+      "fiction_notice": "実在の場所を舞台にした架空のゲーム事件です。実際の出来事・施設の状況を示すものではありません。",
+      "premise": "ゲームの不思議な潮で巨大イワシが海辺に乗り上げた。仲間たちも心配で集まってくる。",
+      "objective": "地上ゲートを守り、帰海パワーで巨大イワシを海へ戻す。",
+      "enemy_ids": [
+        "giant_sardine",
+        "spring_mullet",
+        "wave_pukkun",
+        "crab_drummer"
+      ],
+      "wave_concept": "ボラ前座→ボス1体→HP70%で波→40%で太鼓→最後はボス単独。",
+      "difficulty": "boss",
+      "introduction": [
+        {
+          "speaker": "キキ",
+          "emotion": "normal",
+          "text": "イワシ大将、海へのお迎えを呼ぶよ！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "normal",
+          "text": "実物には近づかないよ。ここでは魔法の帰海パワーを使おう。"
+        }
+      ],
+      "outro": [
+        {
+          "speaker": "キキ",
+          "emotion": "smile",
+          "text": "大きな潮に乗って、おかえりー！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "smile",
+          "text": "塔には入らず地上で完了。海からのおじぎ、見えたね。"
+        }
+      ],
+      "implementation_notes": [
+        "既存の3戦闘ステージ・21小話を上書きしない追加ミッション。",
+        "会話の追加だけでは実装済みに数えない。敵配置・勝敗条件・報酬を接続してから公開。",
+        "タワー入場や塔内探索なし。全戦闘・会話は公園の地上エリア。"
+      ]
+    },
+    {
+      "id": "ikisu_shrine_ex_01",
+      "location_id": "ikisu_shrine",
+      "location": "息栖神社",
+      "title": "おじぎの列が大混雑",
+      "content_type": "playable_mission",
+      "status": "proposed_not_implemented",
+      "fiction_notice": "実在の場所を舞台にした架空のゲーム事件です。実際の出来事・施設の状況を示すものではありません。",
+      "premise": "お参りごっこの列へ、ピーマルンが何度も並び直して大混雑。",
+      "objective": "参道の入口を3ウェーブ守り、列を整える。",
+      "enemy_ids": [
+        "pepper_marun",
+        "buzz_bee"
+      ],
+      "wave_concept": "ハチの小隊→ピーマルン1体→時間差で前衛2体。",
+      "difficulty": "easy",
+      "introduction": [
+        {
+          "speaker": "キキ",
+          "emotion": "surprised",
+          "text": "あれ？ 同じピーマンさんが三回並んでる！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "normal",
+          "text": "ご利益も順番待ちだよ。まず通り道を空けよう。"
+        }
+      ],
+      "outro": [
+        {
+          "speaker": "キキ",
+          "emotion": "smile",
+          "text": "みんな一回ずつ、おじぎできたね！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "smile",
+          "text": "ピーマルン、今度は案内係だって。"
+        }
+      ],
+      "implementation_notes": [
+        "既存の3戦闘ステージ・21小話を上書きしない追加ミッション。",
+        "会話の追加だけでは実装済みに数えない。敵配置・勝敗条件・報酬を接続してから公開。"
+      ]
+    },
+    {
+      "id": "ikisu_shrine_ex_02",
+      "location_id": "ikisu_shrine",
+      "location": "息栖神社",
+      "title": "願いごと凧の大回転",
+      "content_type": "playable_mission",
+      "status": "proposed_not_implemented",
+      "fiction_notice": "実在の場所を舞台にした架空のゲーム事件です。実際の出来事・施設の状況を示すものではありません。",
+      "premise": "紙の雲だこが架空の願いごとカードを集めすぎ、空中でくるくる。",
+      "objective": "カードの置き場を守り、飛ぶ敵を12体落ち着かせる。",
+      "enemy_ids": [
+        "wind_kite",
+        "bubble_fish"
+      ],
+      "wave_concept": "凧4体→泡魚2体と凧4体→速い凧4体。",
+      "difficulty": "normal",
+      "introduction": [
+        {
+          "speaker": "キキ",
+          "emotion": "normal",
+          "text": "空のお願いごとが、ぐるぐる読めないよ！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "normal",
+          "text": "一度に願うのは、おやつ一皿くらいにしよう。"
+        }
+      ],
+      "outro": [
+        {
+          "speaker": "キキ",
+          "emotion": "smile",
+          "text": "カードが元の箱に戻った！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "sleepy",
+          "text": "ぼくのお願い？ お昼寝はあとで。"
+        }
+      ],
+      "implementation_notes": [
+        "既存の3戦闘ステージ・21小話を上書きしない追加ミッション。",
+        "会話の追加だけでは実装済みに数えない。敵配置・勝敗条件・報酬を接続してから公開。"
+      ]
+    },
+    {
+      "id": "ikisu_shrine_ex_03",
+      "location_id": "ikisu_shrine",
+      "location": "息栖神社",
+      "title": "松ぼっくりは通せんぼ",
+      "content_type": "playable_mission",
+      "status": "proposed_not_implemented",
+      "fiction_notice": "実在の場所を舞台にした架空のゲーム事件です。実際の出来事・施設の状況を示すものではありません。",
+      "premise": "まつモコ丸が道案内の練習中に寝てしまい、通路をふさいだ。",
+      "objective": "遅い大型前衛3体を退却させるまで入口を保つ。",
+      "enemy_ids": [
+        "pine_mokomaru",
+        "crab_drummer"
+      ],
+      "wave_concept": "眠り前衛1体→太鼓役追加→眠り前衛2体の重い最終列。",
+      "difficulty": "normal",
+      "introduction": [
+        {
+          "speaker": "キキ",
+          "emotion": "surprised",
+          "text": "道案内さんが、道そのものになってる！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "normal",
+          "text": "起こす係と、通れる場所を守る係に分かれよう。"
+        }
+      ],
+      "outro": [
+        {
+          "speaker": "キキ",
+          "emotion": "smile",
+          "text": "お昼寝の場所を替えてくれた！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "sleepy",
+          "text": "寝返りしても道はふさがないね。"
+        }
+      ],
+      "implementation_notes": [
+        "既存の3戦闘ステージ・21小話を上書きしない追加ミッション。",
+        "会話の追加だけでは実装済みに数えない。敵配置・勝敗条件・報酬を接続してから公開。"
+      ]
+    },
+    {
+      "id": "ikisu_shrine_ex_04",
+      "location_id": "ikisu_shrine",
+      "location": "息栖神社",
+      "title": "ぶんぶんお花見隊",
+      "content_type": "playable_mission",
+      "status": "proposed_not_implemented",
+      "fiction_notice": "実在の場所を舞台にした架空のゲーム事件です。実際の出来事・施設の状況を示すものではありません。",
+      "premise": "ハチたちが光るゲームの花を探し、入口へ迷い込んだ。",
+      "objective": "花マーカーが点灯するまで60秒防衛する。",
+      "enemy_ids": [
+        "buzz_bee",
+        "bee_swarm"
+      ],
+      "wave_concept": "小隊を短い間隔で投入、30秒後に群れ、最後は休憩間隔あり。",
+      "difficulty": "normal",
+      "introduction": [
+        {
+          "speaker": "キキ",
+          "emotion": "normal",
+          "text": "花を探して、こっちへ来ちゃったのかな。"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "normal",
+          "text": "ゲームの花マーカーをつけよう。現実のハチには近づかないでね。"
+        }
+      ],
+      "outro": [
+        {
+          "speaker": "キキ",
+          "emotion": "smile",
+          "text": "花の道へ、みんな帰っていくよ。"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "smile",
+          "text": "刺す場面はなし。無事に解決だね。"
+        }
+      ],
+      "implementation_notes": [
+        "既存の3戦闘ステージ・21小話を上書きしない追加ミッション。",
+        "会話の追加だけでは実装済みに数えない。敵配置・勝敗条件・報酬を接続してから公開。"
+      ]
+    },
+    {
+      "id": "ikisu_shrine_ex_05",
+      "location_id": "ikisu_shrine",
+      "location": "息栖神社",
+      "title": "泡のお供え運び",
+      "content_type": "playable_mission",
+      "status": "proposed_not_implemented",
+      "fiction_notice": "実在の場所を舞台にした架空のゲーム事件です。実際の出来事・施設の状況を示すものではありません。",
+      "premise": "なみプックンが空っぽの飾り箱を泡に乗せ、ふわふわ大渋滞。",
+      "objective": "飾り箱のゴールを守り、泡の前衛を4体退却させる。",
+      "enemy_ids": [
+        "wave_pukkun",
+        "bubble_fish"
+      ],
+      "wave_concept": "泡魚の列→なみプックン2体→前後を入れ替えた混成列。",
+      "difficulty": "hard",
+      "introduction": [
+        {
+          "speaker": "キキ",
+          "emotion": "surprised",
+          "text": "箱が空を泳いでる！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "normal",
+          "text": "運ぶ先は、そっちじゃなくてこっち。"
+        }
+      ],
+      "outro": [
+        {
+          "speaker": "キキ",
+          "emotion": "smile",
+          "text": "箱がきちんと並んだね！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "smile",
+          "text": "泡の宅配便は、ただいま休憩中。"
+        }
+      ],
+      "implementation_notes": [
+        "既存の3戦闘ステージ・21小話を上書きしない追加ミッション。",
+        "会話の追加だけでは実装済みに数えない。敵配置・勝敗条件・報酬を接続してから公開。"
+      ]
+    },
+    {
+      "id": "ikisu_shrine_ex_06",
+      "location_id": "ikisu_shrine",
+      "location": "息栖神社",
+      "title": "しずかな道の大作戦",
+      "content_type": "playable_mission",
+      "status": "proposed_not_implemented",
+      "fiction_notice": "実在の場所を舞台にした架空のゲーム事件です。実際の出来事・施設の状況を示すものではありません。",
+      "premise": "太鼓とバイクとマスコットの架空パレードが、静かな道で大音量。",
+      "objective": "4ウェーブを防ぎ、最後のライダーを静音化する。",
+      "enemy_ids": [
+        "crab_drummer",
+        "rattle_rider",
+        "pepper_marun"
+      ],
+      "wave_concept": "太鼓隊→ライダーの短距離ラッシュ→丈夫な前衛→全員混成。",
+      "difficulty": "hard",
+      "introduction": [
+        {
+          "speaker": "キキ",
+          "emotion": "normal",
+          "text": "元気いっぱい。でも音が大きすぎるよ！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "normal",
+          "text": "静かなパレードの練習、始めよう。"
+        }
+      ],
+      "outro": [
+        {
+          "speaker": "キキ",
+          "emotion": "smile",
+          "text": "しーっ、でも笑顔は大きく！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "smile",
+          "text": "バイクは押して帰るって。これで安心。"
+        }
+      ],
+      "implementation_notes": [
+        "既存の3戦闘ステージ・21小話を上書きしない追加ミッション。",
+        "会話の追加だけでは実装済みに数えない。敵配置・勝敗条件・報酬を接続してから公開。"
+      ]
+    },
+    {
+      "id": "ishigami_kindergarten_ex_01",
+      "location_id": "ishigami_kindergarten",
+      "location": "石神幼稚園",
+      "title": "お庭にぶんぶん大集合",
+      "content_type": "playable_mission",
+      "status": "proposed_not_implemented",
+      "fiction_notice": "実在の場所を舞台にした架空のゲーム事件です。実際の出来事・施設の状況を示すものではありません。",
+      "premise": "架空の光る花を追ってハチの群れが園庭に迷い込んだ。園児は画面外の安全な場所にいる。",
+      "objective": "園庭ゲートを3ウェーブ守り、ハチを花マーカーへ帰す。",
+      "enemy_ids": [
+        "buzz_bee",
+        "bee_swarm"
+      ],
+      "wave_concept": "偵察6体→群れ2体→小隊と群れの交互進行。",
+      "difficulty": "easy",
+      "introduction": [
+        {
+          "speaker": "キキ",
+          "emotion": "surprised",
+          "text": "ぶんぶんの数が、数えきれない！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "normal",
+          "text": "これはゲームのお話。現実なら近づかず大人に知らせてね。"
+        }
+      ],
+      "outro": [
+        {
+          "speaker": "キキ",
+          "emotion": "smile",
+          "text": "みんな花の方へ帰ったよ！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "smile",
+          "text": "お庭の安全確認は大人におまかせ。"
+        }
+      ],
+      "implementation_notes": [
+        "既存の3戦闘ステージ・21小話を上書きしない追加ミッション。",
+        "会話の追加だけでは実装済みに数えない。敵配置・勝敗条件・報酬を接続してから公開。"
+      ]
+    },
+    {
+      "id": "ishigami_kindergarten_ex_02",
+      "location_id": "ishigami_kindergarten",
+      "location": "石神幼稚園",
+      "title": "積み木より大きいピーマン",
+      "content_type": "playable_mission",
+      "status": "proposed_not_implemented",
+      "fiction_notice": "実在の場所を舞台にした架空のゲーム事件です。実際の出来事・施設の状況を示すものではありません。",
+      "premise": "ピーマルンが積み木のお城に入りたいのに、大きなおなかがつかえた。",
+      "objective": "積み木ゲートを守り、ピーマルン3体を落ち着かせる。",
+      "enemy_ids": [
+        "pepper_marun",
+        "can_robot"
+      ],
+      "wave_concept": "単体の前衛→回収ロボ2体→前衛2体が別のタイミングで出現。",
+      "difficulty": "normal",
+      "introduction": [
+        {
+          "speaker": "キキ",
+          "emotion": "normal",
+          "text": "お城のドアより、おなかが大きい！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "normal",
+          "text": "ドアを押す前に、外で遊ぼうって伝えよう。"
+        }
+      ],
+      "outro": [
+        {
+          "speaker": "キキ",
+          "emotion": "smile",
+          "text": "お城の外に、楽しい行列ができた！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "smile",
+          "text": "おなかのサイズも、りっぱな個性。"
+        }
+      ],
+      "implementation_notes": [
+        "既存の3戦闘ステージ・21小話を上書きしない追加ミッション。",
+        "会話の追加だけでは実装済みに数えない。敵配置・勝敗条件・報酬を接続してから公開。"
+      ]
+    },
+    {
+      "id": "ishigami_kindergarten_ex_03",
+      "location_id": "ishigami_kindergarten",
+      "location": "石神幼稚園",
+      "title": "しゃぼん玉は魚つき",
+      "content_type": "playable_mission",
+      "status": "proposed_not_implemented",
+      "fiction_notice": "実在の場所を舞台にした架空のゲーム事件です。実際の出来事・施設の状況を示すものではありません。",
+      "premise": "しゃぼん玉の中から魚が現れ、おもちゃの道をぴちぴち進む。",
+      "objective": "帰海バブルの準備が終わるまで45秒耐える。",
+      "enemy_ids": [
+        "bubble_fish",
+        "spring_mullet"
+      ],
+      "wave_concept": "泡魚のゆっくり列に、15秒ごとの跳ね魚ラッシュを重ねる。",
+      "difficulty": "normal",
+      "introduction": [
+        {
+          "speaker": "キキ",
+          "emotion": "surprised",
+          "text": "今日のしゃぼん玉、目が合う！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "normal",
+          "text": "お魚さん、海行きの便はこちらです。"
+        }
+      ],
+      "outro": [
+        {
+          "speaker": "キキ",
+          "emotion": "smile",
+          "text": "泡に乗って、しゅっぱーつ！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "smile",
+          "text": "窓側の席、みんな当たったね。"
+        }
+      ],
+      "implementation_notes": [
+        "既存の3戦闘ステージ・21小話を上書きしない追加ミッション。",
+        "会話の追加だけでは実装済みに数えない。敵配置・勝敗条件・報酬を接続してから公開。"
+      ]
+    },
+    {
+      "id": "ishigami_kindergarten_ex_04",
+      "location_id": "ishigami_kindergarten",
+      "location": "石神幼稚園",
+      "title": "おひるね前のドンドコ",
+      "content_type": "playable_mission",
+      "status": "proposed_not_implemented",
+      "fiction_notice": "実在の場所を舞台にした架空のゲーム事件です。実際の出来事・施設の状況を示すものではありません。",
+      "premise": "カニの太鼓隊が、おひるねの時間を運動会と間違えた。",
+      "objective": "太鼓役4体を落ち着かせ、静かな時間を取り戻す。",
+      "enemy_ids": [
+        "crab_drummer",
+        "buzz_bee"
+      ],
+      "wave_concept": "太鼓1体→ハチ護衛つき太鼓2体→最後は太鼓1体だけの間合い戦。",
+      "difficulty": "normal",
+      "introduction": [
+        {
+          "speaker": "キキ",
+          "emotion": "normal",
+          "text": "カニさん、今はドンドコじゃなくて、すやすやだよ！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "yawn",
+          "text": "ぼくもあくびが出ちゃった。小さな音にしよう。"
+        }
+      ],
+      "outro": [
+        {
+          "speaker": "キキ",
+          "emotion": "smile",
+          "text": "太鼓が、やさしいトントンになった！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "smile",
+          "text": "これなら眠れる……おっと、まだ任務中。"
+        }
+      ],
+      "implementation_notes": [
+        "既存の3戦闘ステージ・21小話を上書きしない追加ミッション。",
+        "会話の追加だけでは実装済みに数えない。敵配置・勝敗条件・報酬を接続してから公開。"
+      ]
+    },
+    {
+      "id": "ishigami_kindergarten_ex_05",
+      "location_id": "ishigami_kindergarten",
+      "location": "石神幼稚園",
+      "title": "お片づけロボの逆走",
+      "content_type": "playable_mission",
+      "status": "proposed_not_implemented",
+      "fiction_notice": "実在の場所を舞台にした架空のゲーム事件です。実際の出来事・施設の状況を示すものではありません。",
+      "premise": "カラカンロボが片づける向きを間違え、おもちゃの箱を入口へ運ぶ。",
+      "objective": "入口を守り、ロボ5体のモードを戻す。",
+      "enemy_ids": [
+        "can_robot",
+        "pine_mokomaru"
+      ],
+      "wave_concept": "ロボ2体→眠り前衛1体→間隔の短いロボ3体。",
+      "difficulty": "hard",
+      "introduction": [
+        {
+          "speaker": "キキ",
+          "emotion": "surprised",
+          "text": "お片づけしたのに、また出てきた！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "normal",
+          "text": "矢印が逆だ。落ち着いて順番に直そう。"
+        }
+      ],
+      "outro": [
+        {
+          "speaker": "キキ",
+          "emotion": "smile",
+          "text": "箱がぴったり棚に戻った！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "smile",
+          "text": "片づけ上手の金メダルだね。"
+        }
+      ],
+      "implementation_notes": [
+        "既存の3戦闘ステージ・21小話を上書きしない追加ミッション。",
+        "会話の追加だけでは実装済みに数えない。敵配置・勝敗条件・報酬を接続してから公開。"
+      ]
+    },
+    {
+      "id": "ishigami_kindergarten_ex_06",
+      "location_id": "ishigami_kindergarten",
+      "location": "石神幼稚園",
+      "title": "ぐるぐる園庭パレード",
+      "content_type": "playable_mission",
+      "status": "proposed_not_implemented",
+      "fiction_notice": "実在の場所を舞台にした架空のゲーム事件です。実際の出来事・施設の状況を示すものではありません。",
+      "premise": "架空のマスコットたちが出口を忘れ、園庭の行進が止まらない。",
+      "objective": "4ウェーブを守り、最後の行進隊を出口へ案内する。",
+      "enemy_ids": [
+        "pepper_marun",
+        "wave_pukkun",
+        "pine_mokomaru"
+      ],
+      "wave_concept": "緑の前衛→泡の加速隊→眠り前衛→3種の最後尾。",
+      "difficulty": "hard",
+      "introduction": [
+        {
+          "speaker": "キキ",
+          "emotion": "normal",
+          "text": "これで園庭、何周目！？"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "normal",
+          "text": "数えるより、出口の看板を見せよう。"
+        }
+      ],
+      "outro": [
+        {
+          "speaker": "キキ",
+          "emotion": "smile",
+          "text": "最後の一周、ばいばーい！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "smile",
+          "text": "出口の看板も、ひと仕事終えてにっこりだね。"
+        }
+      ],
+      "implementation_notes": [
+        "既存の3戦闘ステージ・21小話を上書きしない追加ミッション。",
+        "会話の追加だけでは実装済みに数えない。敵配置・勝敗条件・報酬を接続してから公開。"
+      ]
+    },
+    {
+      "id": "karuno_elementary_ex_01",
+      "location_id": "karuno_elementary",
+      "location": "軽野小学校",
+      "title": "チャイムに負けるなカニ太鼓",
+      "content_type": "playable_mission",
+      "status": "proposed_not_implemented",
+      "fiction_notice": "実在の場所を舞台にした架空のゲーム事件です。実際の出来事・施設の状況を示すものではありません。",
+      "premise": "架空の放課後イベントで、太鼓隊が終了の合図を聞き逃した。",
+      "objective": "校門ゲートを3ウェーブ守り、演奏を終える。",
+      "enemy_ids": [
+        "crab_drummer",
+        "can_robot"
+      ],
+      "wave_concept": "太鼓2体→ロボ護衛→太鼓とロボのゆっくり大行進。",
+      "difficulty": "easy",
+      "introduction": [
+        {
+          "speaker": "キキ",
+          "emotion": "surprised",
+          "text": "チャイムの後に、アンコール三回！？"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "normal",
+          "text": "終わりの合図を、見えるようにしよう。"
+        }
+      ],
+      "outro": [
+        {
+          "speaker": "キキ",
+          "emotion": "smile",
+          "text": "ぴたっとそろって、おしまい！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "smile",
+          "text": "最後のおじぎが一番上手だった。"
+        }
+      ],
+      "implementation_notes": [
+        "既存の3戦闘ステージ・21小話を上書きしない追加ミッション。",
+        "会話の追加だけでは実装済みに数えない。敵配置・勝敗条件・報酬を接続してから公開。"
+      ]
+    },
+    {
+      "id": "karuno_elementary_ex_02",
+      "location_id": "karuno_elementary",
+      "location": "軽野小学校",
+      "title": "跳び箱じゃないよボラ選手",
+      "content_type": "playable_mission",
+      "status": "proposed_not_implemented",
+      "fiction_notice": "実在の場所を舞台にした架空のゲーム事件です。実際の出来事・施設の状況を示すものではありません。",
+      "premise": "跳ねボラがゲームの運動会に参加し、ゴールを飛び越え続ける。",
+      "objective": "速い敵18体を退却させるまで守る。",
+      "enemy_ids": [
+        "spring_mullet",
+        "bubble_fish"
+      ],
+      "wave_concept": "ボラ6体→泡魚2体を挟むボラ6体→休憩後にボラ6体。",
+      "difficulty": "normal",
+      "introduction": [
+        {
+          "speaker": "キキ",
+          "emotion": "normal",
+          "text": "そのジャンプ、どこまで行くの！？"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "normal",
+          "text": "着地のひと休みを見逃さないで。"
+        }
+      ],
+      "outro": [
+        {
+          "speaker": "キキ",
+          "emotion": "smile",
+          "text": "全員、帰海バブルに着地！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "smile",
+          "text": "海でも順番を守って跳んでね。"
+        }
+      ],
+      "implementation_notes": [
+        "既存の3戦闘ステージ・21小話を上書きしない追加ミッション。",
+        "会話の追加だけでは実装済みに数えない。敵配置・勝敗条件・報酬を接続してから公開。"
+      ]
+    },
+    {
+      "id": "karuno_elementary_ex_03",
+      "location_id": "karuno_elementary",
+      "location": "軽野小学校",
+      "title": "給食じゃないピーマルン",
+      "content_type": "playable_mission",
+      "status": "proposed_not_implemented",
+      "fiction_notice": "実在の場所を舞台にした架空のゲーム事件です。実際の出来事・施設の状況を示すものではありません。",
+      "premise": "ピーマルンが自分の紹介ポスターを配りすぎ、校門前が緑色。",
+      "objective": "ポスター置き場を守り、前衛4体を落ち着かせる。",
+      "enemy_ids": [
+        "pepper_marun",
+        "wind_kite"
+      ],
+      "wave_concept": "前衛1体→凧の速攻→前衛3体が時間差で入場。",
+      "difficulty": "normal",
+      "introduction": [
+        {
+          "speaker": "キキ",
+          "emotion": "surprised",
+          "text": "ぼくはお野菜じゃなくて妖精、だって！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "normal",
+          "text": "自己紹介は、一人一枚で十分だよ。"
+        }
+      ],
+      "outro": [
+        {
+          "speaker": "キキ",
+          "emotion": "smile",
+          "text": "ポスターは掲示板に一枚だけ！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "smile",
+          "text": "覚えたよ、ピーマルン。好きなものは拍手だね。"
+        }
+      ],
+      "implementation_notes": [
+        "既存の3戦闘ステージ・21小話を上書きしない追加ミッション。",
+        "会話の追加だけでは実装済みに数えない。敵配置・勝敗条件・報酬を接続してから公開。"
+      ]
+    },
+    {
+      "id": "karuno_elementary_ex_04",
+      "location_id": "karuno_elementary",
+      "location": "軽野小学校",
+      "title": "校庭にお昼寝前線",
+      "content_type": "playable_mission",
+      "status": "proposed_not_implemented",
+      "fiction_notice": "実在の場所を舞台にした架空のゲーム事件です。実際の出来事・施設の状況を示すものではありません。",
+      "premise": "まつモコ丸が日なたを追って動き、進路上で次々眠る。",
+      "objective": "眠り前衛4体を見送り、ゲートを守り切る。",
+      "enemy_ids": [
+        "pine_mokomaru",
+        "buzz_bee"
+      ],
+      "wave_concept": "前衛1体→ハチの隙間ラッシュ→前衛2体→最後の大きな1体。",
+      "difficulty": "normal",
+      "introduction": [
+        {
+          "speaker": "キキ",
+          "emotion": "normal",
+          "text": "日なたと一緒に移動してる！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "normal",
+          "text": "気持ちはわかる。でも道は空けよう。"
+        }
+      ],
+      "outro": [
+        {
+          "speaker": "キキ",
+          "emotion": "smile",
+          "text": "休憩マットへ、お引っ越し完了！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "smile",
+          "text": "ぼくの分は……任務が終わってから。"
+        }
+      ],
+      "implementation_notes": [
+        "既存の3戦闘ステージ・21小話を上書きしない追加ミッション。",
+        "会話の追加だけでは実装済みに数えない。敵配置・勝敗条件・報酬を接続してから公開。"
+      ]
+    },
+    {
+      "id": "karuno_elementary_ex_05",
+      "location_id": "karuno_elementary",
+      "location": "軽野小学校",
+      "title": "磁石は金メダルが好き",
+      "content_type": "playable_mission",
+      "status": "proposed_not_implemented",
+      "fiction_notice": "実在の場所を舞台にした架空のゲーム事件です。実際の出来事・施設の状況を示すものではありません。",
+      "premise": "空き缶ロボがゲーム用の飾りメダルを回収物と間違えた。",
+      "objective": "表彰台ゲートを60秒守る。",
+      "enemy_ids": [
+        "can_robot",
+        "crab_drummer"
+      ],
+      "wave_concept": "ロボの間欠列→太鼓の加速→最後20秒はロボ密集。",
+      "difficulty": "hard",
+      "introduction": [
+        {
+          "speaker": "キキ",
+          "emotion": "surprised",
+          "text": "それ、空き缶じゃなくてメダルだよ！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "normal",
+          "text": "磁石の予告が出たら、前衛を厚くしよう。"
+        }
+      ],
+      "outro": [
+        {
+          "speaker": "キキ",
+          "emotion": "smile",
+          "text": "メダルをみんな返してくれた！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "smile",
+          "text": "ロボには片づけ名人賞をあげよう。"
+        }
+      ],
+      "implementation_notes": [
+        "既存の3戦闘ステージ・21小話を上書きしない追加ミッション。",
+        "会話の追加だけでは実装済みに数えない。敵配置・勝敗条件・報酬を接続してから公開。"
+      ]
+    },
+    {
+      "id": "karuno_elementary_ex_06",
+      "location_id": "karuno_elementary",
+      "location": "軽野小学校",
+      "title": "放課後しずかに帰ろう",
+      "content_type": "playable_mission",
+      "status": "proposed_not_implemented",
+      "fiction_notice": "実在の場所を舞台にした架空のゲーム事件です。実際の出来事・施設の状況を示すものではありません。",
+      "premise": "架空の大人ライダーが飾りの音を鳴らし、校外の道へ押しかけた。",
+      "objective": "校門を4ウェーブ防衛し、ライダー6体を減速させる。",
+      "enemy_ids": [
+        "rattle_rider",
+        "wind_kite",
+        "can_robot"
+      ],
+      "wave_concept": "凧の前触れ→ライダー2体→ロボ列→ライダー4体の時間差ラッシュ。",
+      "difficulty": "hard",
+      "introduction": [
+        {
+          "speaker": "キキ",
+          "emotion": "normal",
+          "text": "ガタゴト音で、帰りのあいさつが聞こえない！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "normal",
+          "text": "止まって話そう。静かな道を取り戻すよ。"
+        }
+      ],
+      "outro": [
+        {
+          "speaker": "キキ",
+          "emotion": "smile",
+          "text": "エンジンを止めて、押して帰ってくれた！"
+        },
+        {
+          "speaker": "ネネ",
+          "emotion": "smile",
+          "text": "大きい音より、小さい会釈。いいね。"
+        }
+      ],
+      "implementation_notes": [
+        "既存の3戦闘ステージ・21小話を上書きしない追加ミッション。",
+        "会話の追加だけでは実装済みに数えない。敵配置・勝敗条件・報酬を接続してから公開。"
+      ]
+    }
+  ]
+}

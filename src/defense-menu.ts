@@ -1,9 +1,10 @@
+import {missionMenu} from './mission-menu.ts';
 import type {AudioPrefs} from './game-audio.ts';
 import {walkMenu} from './local-walk.ts';
 import {MISSION_LOCATIONS} from './mission-locations.ts';
 import {CATS, STAGES} from './defense.ts';
 import {CAT_TIPS,APPROVED_ART,artURL} from './defense-assets.ts';
-export type MenuPage='home'|'map'|'mission'|'walk'|'visit'|'team'|'catalog'|'help'|'settings'|'audio';
+export type MenuPage='home'|'map'|'mission'|'walk'|'visit'|'team'|'catalog'|'help'|'settings'|'audio'|'quests';
 export let page:MenuPage='home';
 export let selectedStage=0;
 let card=0, helpPage=0;
@@ -14,8 +15,8 @@ export function stepCard(d:number){card=(card+d+CATS.length)%CATS.length;}
 export function stepHelp(d:number){helpPage=(helpPage+d+3)%3;}
 const back='<button data-home class="quiet">タイトルへ</button>';
 const footer=(extra='')=>`<nav class="menu-nav">${back}${extra}</nav>`;
-export function menu(p:MenuPage,cleared:number[],ready:boolean,started:boolean,portrait:(i:number)=>string,tv:boolean,audio:AudioPrefs){
- page=p;
+export function menu(p:MenuPage,cleared:number[],ready:boolean,started:boolean,portrait:(i:number)=>string,tv:boolean,audio:AudioPrefs,missionCleared:string[]=[]){
+ page=p;if(p==='quests')return missionMenu(missionCleared);
  if(p==='walk'||p==='visit')return walkMenu(p==='visit');
  const top=(label:string,title:string)=>`<div class="menu-heading"><span class="eyebrow">${label}</span><h2>${title}</h2></div>`;
  if(p==='home')return `<div class="title-scene" style="background-image:linear-gradient(90deg,#102f3bf2,#102f3b66,#102f3bd9),url('${APPROVED_ART.map}')" aria-hidden="true"><i class="sun"></i><i class="horizon"></i><i class="crane crane-a"></i><i class="crane crane-b"></i><i class="wave"></i></div><img class="title-hero-cat" src="${APPROVED_ART.cream}" alt="主役のキキ"><img class="title-hero-cat silver-hero" src="${APPROVED_ART.silver}" alt="主役のネネ"><div class="title-copy"><span class="eyebrow">KAMISU • CAT DEFENSE</span><h2>神栖を<br><em>守れ！！</em></h2><p>ふたりで守る、潮風のまち。</p><span class="asset-status">キキとネネの町まもり</span></div><nav class="title-actions"><button data-map class="primary" ${!ready?'disabled':''}>作戦をはじめる <b>→</b></button>${started?'<button data-close>戦場にもどる</button>':''}<button data-catalog>ねこ図鑑</button><button data-settings>設定・操作</button><button data-help>あそび方</button></nav><span class="title-footer">IBARAKI, JAPAN / ねこの町まもり隊</span>`;

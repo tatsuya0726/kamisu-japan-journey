@@ -18,7 +18,7 @@ dialog[data-page=home] .title-progress b{font-size:20px;line-height:1}
 dialog[data-page=home] .title-actions{gap:10px}
 dialog[data-page=home] .title-actions .primary{background:linear-gradient(var(--sun) 0 62%,#ff9d2e 62%);color:var(--ink);box-shadow:0 5px 0 var(--sun-deep),0 8px 0 var(--ink-2);min-height:68px;justify-content:center;text-align:center;font-size:clamp(19px,2.3vw,28px);letter-spacing:.08em;border-radius:12px;border-width:3px}
 dialog[data-page=home] .title-actions>button:not(.primary){justify-content:center;text-align:center;min-height:48px}
-dialog[data-page=home] .title-sub{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+dialog[data-page=home] .title-sub{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
 dialog[data-page=home] .title-sub button{min-height:48px;padding:8px 4px;text-align:center;font-size:clamp(11px,1.3vw,15px);background:#1d4452f0;white-space:nowrap}
 dialog[data-page=home] .title-footer{text-shadow:0 1px 0 var(--ink-2)}
 @media(max-height:600px){dialog[data-page=home] .title-copy .logo{font-size:54px;margin:20px 0 12px}dialog[data-page=home] .title-actions .primary{min-height:52px;font-size:19px}dialog[data-page=home] .title-actions>button:not(.primary),dialog[data-page=home] .title-sub button{min-height:40px}dialog[data-page=home] .title-actions{gap:7px}dialog[data-page=home] .title-progress{font-size:11px;padding:3px 9px}dialog[data-page=home] .title-progress b{font-size:15px}}

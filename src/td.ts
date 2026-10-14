@@ -12,6 +12,7 @@ import {finishVisit,anotherVisit} from './local-walk.ts';
 import {menu,page,setStage,stepCard,stepHelp,type MenuPage} from './defense-menu.ts';
 import Phaser from 'phaser';
 import './td.css';
+import {openRogue,closeRogue} from './rogue/ui.ts';
 import {CAT_SPRITES,APPROVED_ART,artURL} from './defense-assets.ts';
 import {FIELD,CATS,ENEMIES,STAGES,SAVE_KEY,decodeProgress,fresh,spawn,tick} from './defense.ts';
 const $=(id:string)=>document.getElementById(id)!;
@@ -24,6 +25,7 @@ try{tv=localStorage.getItem('kamisu.display.tv')==='true';}catch{}
 document.documentElement.classList.toggle('tv-safe',tv);
 function screen(p:MenuPage){modal.dataset.page=p;show(menu(p,progress.cleared,ready,started,portrait,tv,sound.prefs,missionProgress.cleared));mountMap(modal);}
 function home(){screen('home');}
+modal.addEventListener('click',e=>{const b=(e.target as HTMLElement).closest<HTMLElement>('[data-rogue],[data-rogue-continue]');if(!b)return;const resume=b.hasAttribute('data-rogue-continue');modal.close();openRogue({sfx:k=>sound.effect(k),exit:()=>{closeRogue();home();}},resume);});
 function settings(){screen('settings');}
 let s=fresh(),progress=decodeProgress(null),started=false,lastResult='playing',ready=false,returnPause=false;
 try{progress=decodeProgress(localStorage.getItem(SAVE_KEY));}catch{$('save-note').textContent='保存は利用できません';}
@@ -103,3 +105,4 @@ import './battle-layout.css';
 
 import './map-layout.css';
 import './polish.css';
+import './rogue/rogue.css';

@@ -1,0 +1,28 @@
+/* Visual identity: dusk harbour + chunky game-cartridge buttons. Loaded last so it refines every screen. */
+:root{--ink:#0c2230;--ink-2:#06141d;--sea:#1d6f7a;--sand:#fff1d0;--sun:#ffb43b;--sun-deep:#c97a0a;--coral:#ff6f59;--mint:#8fe3b0;--ui:"Hiragino Maru Gothic ProN","Zen Maru Gothic","BIZ UDPGothic","Yu Gothic","Hiragino Kaku Gothic ProN","Noto Sans JP",Meiryo,sans-serif}
+body,button,dialog,input{font-family:var(--ui)}
+/* chunky buttons: hard edge, lift, press */
+dialog .title-actions button,dialog .menu-nav button,dialog .map-heading>button{border:2px solid var(--ink);box-shadow:0 4px 0 var(--ink-2),inset 0 2px 0 #ffffff24;font-weight:800;letter-spacing:.04em;transition:transform .08s,box-shadow .08s,background .15s}
+dialog .title-actions button:active,dialog .menu-nav button:active,dialog .map-heading>button:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink-2)}
+dialog .menu-nav .primary,dialog .map-heading>button:last-child{background:linear-gradient(var(--sun) 0 62%,#ff9d2e 62%);color:var(--ink);box-shadow:0 4px 0 var(--sun-deep),0 7px 0 var(--ink-2)}
+dialog .menu-heading h2,dialog .map-heading h2{font-weight:900;letter-spacing:.04em;text-shadow:0 3px 0 var(--ink-2)}
+dialog{border:3px solid #fff1d03d;box-shadow:0 0 0 3px var(--ink-2),0 18px 70px #071e2eb0}
+/* logo is index.html-inline so the tap screen paints first; title reuses it */
+/* title screen */
+dialog[data-page=home] .title-copy{display:grid;justify-items:start;gap:0}
+dialog[data-page=home] .title-tag{padding:3px 10px;background:var(--ink);border:2px solid #fff1d055;border-radius:4px;color:var(--sand);font-size:11px;font-weight:700;letter-spacing:.14em}
+dialog[data-page=home] .title-copy .logo{font-size:clamp(46px,7vw,104px);margin:22px 0 14px;letter-spacing:.03em;line-height:1;transform:rotate(-3deg);transform-origin:left bottom}
+dialog[data-page=home] .title-copy p{margin:0 0 12px;font-weight:700;text-shadow:0 2px 0 var(--ink-2)}
+dialog[data-page=home] .title-progress{display:inline-flex;gap:6px;align-items:baseline;padding:5px 12px;background:var(--sand);color:var(--ink);border:2px solid var(--ink);border-radius:6px;font-size:13px;font-weight:800;box-shadow:0 3px 0 var(--ink-2)}
+dialog[data-page=home] .title-progress b{font-size:20px;line-height:1}
+dialog[data-page=home] .title-actions{gap:10px}
+dialog[data-page=home] .title-actions .primary{background:linear-gradient(var(--sun) 0 62%,#ff9d2e 62%);color:var(--ink);box-shadow:0 5px 0 var(--sun-deep),0 8px 0 var(--ink-2);min-height:68px;justify-content:center;text-align:center;font-size:clamp(19px,2.3vw,28px);letter-spacing:.08em;border-radius:12px;border-width:3px}
+dialog[data-page=home] .title-actions>button:not(.primary){justify-content:center;text-align:center;min-height:48px}
+dialog[data-page=home] .title-sub{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+dialog[data-page=home] .title-sub button{min-height:48px;padding:8px 4px;text-align:center;font-size:clamp(11px,1.3vw,15px);background:#1d4452f0;white-space:nowrap}
+dialog[data-page=home] .title-footer{text-shadow:0 1px 0 var(--ink-2)}
+@media(max-height:600px){dialog[data-page=home] .title-copy .logo{font-size:54px;margin:20px 0 12px}dialog[data-page=home] .title-actions .primary{min-height:52px;font-size:19px}dialog[data-page=home] .title-actions>button:not(.primary),dialog[data-page=home] .title-sub button{min-height:40px}dialog[data-page=home] .title-actions{gap:7px}dialog[data-page=home] .title-progress{font-size:11px;padding:3px 9px}dialog[data-page=home] .title-progress b{font-size:15px}}
+@media(prefers-reduced-motion:no-preference){dialog[data-page=home] .title-copy .logo{animation:stamp .55s cubic-bezier(.2,1.4,.4,1) both}dialog[data-page=home] .title-actions{animation:rise .5s .35s ease-out both}dialog[data-page=home] .title-hero-cat{animation:rise .6s .15s ease-out both}@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}@keyframes stamp{from{opacity:0;transform:translateY(-26px) rotate(-9deg) scale(1.2)}to{opacity:1;transform:rotate(-3deg)}}}
+dialog[data-page=home] .title-hero-cat:not(.silver-hero){left:34%;width:17%}
+dialog[data-page=home] .title-hero-cat.silver-hero{left:50%;width:17%}
+@media(max-width:720px) and (orientation:landscape){dialog[data-page=home] .title-copy .logo{font-size:44px}dialog[data-page=home] .title-hero-cat:not(.silver-hero){left:33%;width:15%}dialog[data-page=home] .title-hero-cat.silver-hero{left:46%;width:15%}}

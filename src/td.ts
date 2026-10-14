@@ -102,3 +102,4 @@ import './dialogue.css';
 import './battle-layout.css';
 
 import './map-layout.css';
+import './polish.css';

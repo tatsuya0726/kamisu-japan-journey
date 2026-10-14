@@ -22,3 +22,8 @@ for(const m of MISSIONS)test(`${m.id}: playable, failure, pause and retry`,()=>{
  const idle=freshMission(m.runtime);while(idle.result==='playing'&&idle.time<240)tick(idle,.1);assert.equal(idle.result,'lose');
  const retry=freshMission(m.runtime);assert.equal(retry.time,0);assert.equal(retry.home,m.runtime.homeHP);assert.equal(retry.units.length,0);
 });
+test('hard-mode tuning: tougher enemies, slower food, and clears take longer than the untuned baseline',()=>{
+ for(const m of MISSIONS){assert.ok((m.runtime.hpScale??1)>=2.2,m.id);assert.ok((m.runtime.dmgScale??1)>=2,m.id);assert.ok(m.runtime.income<=17,m.id);assert.ok(m.runtime.homeHP<=240,m.id);}
+ let total=0;for(const m of MISSIONS){const s=freshMission(m.runtime);let next=0;while(s.result==='playing'&&s.time<240){if(spawn(s,[1,2,0,3,0][next%5]))next++;tick(s,.1);}assert.equal(s.result,'win',m.id);total+=s.time;}
+ assert.ok(total/MISSIONS.length>=75,`average clear ${Math.round(total/MISSIONS.length)}s`);
+});

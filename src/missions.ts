@@ -15,13 +15,15 @@ const schedule:Group[][]=[
  [[[11,2]],[[6,4]],[[11,3],[6,2]]], [[[5,2]],[[0,4]],[[5,2]],[[5,2]]], [[[7,2]],[[9,1]],[[7,3]]], [[[3,4]],[[2,2]],[[3,6]],[[2,2],[3,3]]], [[[8,1]],[[11,2]],[[8,1],[11,2]],[[8,1],[11,2]]], [[[5,2]],[[7,2]],[[11,2]],[[8,2]],[[5,1],[7,1],[8,1],[11,1]]],
  [[[6,4]],[[0,6]],[[6,6]]], [[[5,1]],[[2,4]],[[5,3]]], [[[3,4]],[[8,1]],[[3,6]]], [[[9,1]],[[11,2]],[[9,2]],[[9,2]]], [[[10,2]],[[5,2]],[[11,2]],[[10,3],[5,1]]], [[[3,4]],[[4,1]]]
 ];
+/** Hard-mode tuning: enemy HP/damage multipliers and slower food income per designed difficulty. */
+export const TUNING:Record<string,{hp:number;dmg:number;income:number;swarm:number}>={easy:{hp:2.5,dmg:2,income:14,swarm:1.5},normal:{hp:3.2,dmg:2.4,income:14,swarm:1.75},hard:{hp:3.6,dmg:2.8,income:15,swarm:2},boss:{hp:2.2,dmg:2.2,income:15,swarm:1.25}};
 export const MISSIONS:Mission[]=LOCATION_IDS.flatMap((id,locationIndex)=>pack.missions.filter(m=>m.location_id===id).map((m,index)=>{
  const groups=schedule[locationIndex*6+index],first=pack.enemies.findIndex(e=>e.id===m.enemy_ids[0])+3;
  const seconds=Number(m.objective.match(/(\d+)秒/)?.[1]??0),count=Number(m.objective.match(/(\d+)体/)?.[1]??0);
  const objective:Objective=m.difficulty==='boss'?{type:'boss',kind:7}:seconds?{type:'survive',seconds}:count?{type:'count',kind:m.location_id==='karuno_elementary'&&index===5?13:first,count}:{type:'clear'};
- const waves:number[][]=[];groups.forEach((g,gi)=>{let n=0;for(const [kind,amount] of g)for(let i=0;i<amount;i++)waves.push([2+gi*(seconds?Math.max(7,(seconds-12)/groups.length):17)+n++*1.8,kind+3]);});waves.sort((a,b)=>a[0]-b[0]);
+ const waves:number[][]=[];groups.forEach((g,gi)=>{let n=0;for(const [kind,amount] of g)for(let i=0;i<Math.ceil(amount*TUNING[m.difficulty].swarm);i++)waves.push([2+gi*(seconds?Math.max(7,(seconds-12)/groups.length):13)+n++*1.3,kind+3]);});waves.sort((a,b)=>a[0]-b[0]);
  const bossSupports=m.difficulty==='boss'?(locationIndex===6?[{threshold:.7,kind:11,count:1},{threshold:.4,kind:8,count:1}]:[{threshold:.5,kind:8,count:2}]):undefined;
- return {...m,locationIndex,runtime:{id:m.id,name:m.title,subtitle:m.location,note:m.premise,theme:themes[locationIndex],base:500,income:m.difficulty==='easy'?19:m.difficulty==='hard'?21:20,homeHP:seconds?120:350,spawnX:seconds?700:1050,waves,objective,groups:groups.length,bossSupports}};
+ return {...m,locationIndex,runtime:{id:m.id,name:m.title,subtitle:m.location,note:m.premise,theme:themes[locationIndex],base:500,income:TUNING[m.difficulty].income,hpScale:TUNING[m.difficulty].hp,dmgScale:TUNING[m.difficulty].dmg,homeHP:seconds?90:240,spawnX:seconds?700:1050,waves,objective,groups:groups.length,bossSupports}};
 }));
 export const missionById=(id:string)=>MISSIONS.find(m=>m.id===id);
 export const MISSION_SAVE_KEY='kamisu.missions.progress.v1';

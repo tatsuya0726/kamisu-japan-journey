@@ -41,3 +41,9 @@ dialog:is([data-page=mission],[data-page=quests]) .detail-copy{min-height:0;flex
 .mission-picks{display:grid;gap:7px}.mission-picks button{display:flex;align-items:center;text-align:left;gap:10px;min-height:52px;padding:8px!important;font-size:14px!important}.mission-picks b{color:#ffe6a0;font-size:20px}.mission-picks span{display:grid;gap:3px}.mission-picks small{font-size:11px;opacity:.8}.mission-conversation{display:grid;gap:8px;width:100%;text-align:left}.mission-conversation>div{display:grid;grid-template-columns:56px minmax(0,1fr);gap:9px;align-items:center}.mission-conversation p{margin:0;font-size:14px;line-height:1.5}.mission-conversation .talk-face{width:56px}.mission-conversation .talk-face figcaption{font-size:10px}.fiction-note{display:block;margin-top:10px;font-size:10px;opacity:.7}.mission-goal{color:#ffe7a2;font-weight:bold}#battle-chat .mission-conversation{gap:4px}#battle-chat .mission-conversation>div{grid-template-columns:30px 1fr;gap:6px}#battle-chat .talk-face{width:30px}#battle-chat .talk-face figcaption{display:none}#battle-chat .mission-conversation p{font-size:11px}
 
 dialog[data-page=quests] .extra-mission-detail{background:#17353ff5;}
+
+.map-visit-row{display:flex;gap:8px;align-items:center}
+.map-visit-row>button,.map-visit-row>p{flex:1;margin:0}
+.map-visit-faces{display:flex;gap:4px;flex:none}
+.map-visit-faces .talk-face{width:44px}
+.map-visit-faces .talk-face figcaption{display:none}

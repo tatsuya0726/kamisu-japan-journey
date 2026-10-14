@@ -9,8 +9,6 @@ export const STORY_FACES:Record<string,{intro:TalkFace[],result:TalkFace[]}>=Obj
  ['木陰の風鈴便り','normal','normal','smile','smile'],
  ['葉っぱのしおり','normal','normal','surprised','smile'],
  ['小さな休憩便','normal','sleepy','smile','yawn'],
- ['猫たちの色あそび','normal','normal','smile','smile'],
- ['しっぽ色のリボン','normal','normal','smile','smile'],
  ['まるい雲のお話','normal','normal','surprised','smile'],
  ['猫の配達チャレンジ','normal','normal','smile','smile'],
  ['猫の図書便','normal','normal','smile','normal'],

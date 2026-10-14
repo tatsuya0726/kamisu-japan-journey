@@ -10,6 +10,8 @@ main{grid-template-rows:52px minmax(120px,1fr) 22px 110px;gap:8px}.battlefield{p
 @media(max-height:600px){.audio-settings{gap:6px;grid-template-columns:1fr 1fr;align-items:center}.audio-settings label{font-size:13px;gap:2px}.audio-settings input{min-height:44px}.audio-settings>div,.audio-settings p,.audio-settings small{grid-column:1/-1}.audio-settings p{font-size:11px}.audio-settings small{font-size:10px}}
 #cards [data-cat="8"] .portrait{transform:scale(1.5);transform-origin:52% 68%}
 
-#art-status{position:fixed;top:3px;left:50%;transform:translateX(-50%);z-index:5;font-size:11px;background:#183f49;color:#fff2d5;pointer-events:none}#art-status:empty{display:none}#cards{height:100%;min-height:0;align-items:stretch}#cards .unit-card{height:100%;min-height:60px}#cards .portrait{position:absolute;inset:3px;width:calc(100% - 6px);height:calc(100% - 6px);max-height:none;display:block}
+#art-notice{position:fixed;top:3px;left:50%;transform:translateX(-50%);z-index:5;font-size:11px;background:#183f49;color:#fff2d5;pointer-events:auto}#art-status:empty{display:none}#cards{height:100%;min-height:0;align-items:stretch}#cards .unit-card{height:100%;min-height:60px}#cards .portrait{position:absolute;inset:3px;width:calc(100% - 6px);height:calc(100% - 6px);max-height:none;display:block}
 
 #cards .portrait[data-fallback="true"]{transform:none}
+
+#art-notice button{min-height:44px;padding:3px 8px;font-size:11px}#art-notice:has(#art-status:empty){display:none}

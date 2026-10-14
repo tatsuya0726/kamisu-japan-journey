@@ -12,7 +12,7 @@ export const CAT_ART = {
 export const APPROVED_ART = {
  silver: `${import.meta.env.BASE_URL}defense/runtime/silver.png`,
  cream: `${import.meta.env.BASE_URL}defense/runtime/cream.png`,
- map: `${import.meta.env.BASE_URL}defense/runtime/kamisu-map.png`
+ map: `${import.meta.env.BASE_URL}defense/runtime/kamisu-map.jpg`
 };
 export const CAT_TIPS = [
  '少ないごはんで呼べる前衛。まずはこの子から。',
@@ -28,3 +28,5 @@ export const CAT_TIPS = [
 ];
 
 export const CAT_SPRITES = ['cream','silver','farmer','courier','kiki-sword','kiki-fish','nene-wings','nene-guard','artist','karate'];
+
+export const artURL=(key:string)=>new URL(`${import.meta.env.BASE_URL}defense/runtime/${key}.${['port','coast','town','kamisu-map','arena','central-park','gallery','ikisu','ishigami','karuno','port-park'].includes(key)?'jpg':'png'}`,document.baseURI).href;

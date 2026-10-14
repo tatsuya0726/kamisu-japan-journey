@@ -3,14 +3,14 @@ import assert from 'node:assert/strict';
 import {newRun,visit,startBoss,resolveRound,dismissBattle,DAYS,CHAPTERS} from '../src/rogue/engine.ts';
 import {autoplay,playTurnCommands} from '../src/rogue/bot.ts';
 import {decodeRun,decodeBest,RUN_KEY,BEST_KEY} from '../src/rogue/save.ts';
-import {BOSSES} from '../src/rogue/data.ts';
+import {BOSSES,SPOTS} from '../src/rogue/data.ts';
 import {MISSIONS,MISSION_SAVE_KEY} from '../src/missions.ts';
 import {SAVE_KEY} from '../src/defense.ts';
 
 test('run structure: 3 weeks x 7 days, 7 places per week, boss on day 7', () => {
   assert.equal(DAYS, 7); assert.equal(CHAPTERS, 3); assert.equal(BOSSES.length, 3);
   const r = newRun(1);
-  assert.equal(r.nodes.length, 7); assert.equal(r.party.length, 2);
+  assert.equal(r.nodes.length, SPOTS.length); assert.ok(SPOTS.length >= 12); assert.equal(r.party.length, 2);
   assert.deepEqual(r.party.map(m => m.name), ['キキ', 'ネネ']);
   assert.equal(BOSSES[2].title, 'ラスボス');
 });
@@ -55,19 +55,20 @@ import {checkEvolutions} from '../src/rogue/engine.ts';
 test('3 actions on one habit evolve a member (look, stats, skill); 7 more evolve again', () => {
   const r = newRun(2); const m = r.party[0]; const hp0 = m.maxHp, atk0 = m.atk;
   for (let i = 0; i < T1 - 1; i++) trackAct(m, 'fang');
-  assert.equal(checkEvolutions(r).length, 0);
+  assert.equal(checkEvolutions(r).evos.length, 0);
   trackAct(m, 'fang');
-  const ev = checkEvolutions(r); assert.equal(ev.length, 1);
+  const ev = checkEvolutions(r).evos; assert.equal(ev.length, 1);
   assert.equal(m.name, formName('kiki', 'キキ', 'fang', 1)); assert.equal(m.art, 'kiki-sword');
   assert.ok(m.atk > atk0 && m.maxHp >= hp0); assert.ok(m.skills.includes(PATH.fang.skills[0]));
   assert.equal(evoOf(m).tier, 1);
   for (let i = evoOf(m).fang; i < T2; i++) trackAct(m, 'fang');
-  assert.equal(checkEvolutions(r).length, 1); assert.equal(evoOf(m).tier, 2); assert.ok(m.skills.includes(PATH.fang.skills[1]));
+  assert.equal(checkEvolutions(r).evos.length, 1); assert.equal(evoOf(m).tier, 2); assert.ok(m.skills.includes(PATH.fang.skills[1]));
 });
-test('different habits lead to different forms and skills', () => {
-  const r = newRun(3); const [a, b] = r.party;
+test('habits whose look would not change are just a normal level-up', () => {
+  const r = newRun(3); const [a, b] = r.party; const lv = a.level;
   for (let i = 0; i < T1; i++) { trackAct(a, 'shell'); trackAct(b, 'heart'); }
-  checkEvolutions(r);
-  assert.equal(evoOf(a).path, 'shell'); assert.equal(evoOf(b).path, 'heart');
-  assert.equal(b.art, 'nene-wings'); assert.ok(a.skills.includes('bulwark')); assert.ok(b.skills.includes('warmth'));
+  const out = checkEvolutions(r);
+  assert.equal(a.level, lv + 1); assert.equal(a.name, 'キキ'); assert.equal(a.art, 'cream'); assert.ok(!a.skills.includes('bulwark'));
+  assert.equal(out.evos.length, 1); assert.equal(out.evos[0].i, 1); assert.equal(b.art, 'nene-wings'); assert.ok(b.skills.includes('warmth'));
+  assert.equal(out.ups.length, 1);
 });

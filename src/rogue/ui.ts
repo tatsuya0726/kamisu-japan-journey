@@ -1,12 +1,11 @@
 /** DOM screens for the turn-based roguelike run: map, battle (FF-style command windows), events, shop, rewards. */
 import {newRun,visit,startBoss,chooseEvent,finishEvent,rest,buy,leaveShop,useItem,takeReward,resolveRound,dismissBattle,living,DAYS,CHAPTERS,xpNeed,type RunState,type Member,type Cmd,type Ev,type Foe,type Ref} from './engine.ts';
-import {SKILLS,ITEMS,PERKS,EVENTS,MEMBERS,BOSSES,BOSS_BG,BOSS_PLACE,PLACE_BG} from './data.ts';
+import {SKILLS,ITEMS,PERKS,EVENTS,MEMBERS,BOSSES,BOSS_BG,BOSS_PLACE,PLACE_BG,SPOTS,FOES} from './data.ts';
 import {saveRun,clearRun,loadRun,recordResult,loadBest} from './save.ts';
-import {LANDMARKS} from '../local-walk.ts';
-import {PLACE_LOCATIONS,MISSION_LOCATIONS} from '../mission-locations.ts';
+import {MISSION_LOCATIONS} from '../mission-locations.ts';
 import {APPROVED_ART,artURL} from '../defense-assets.ts';
 import {faceHTML} from '../dialogue.ts';
-import {evoOf,PATH,TRACKS,T1,T2,formName,type Track,type EvoEvent} from './evolve.ts';
+import {evoOf,PATH,TRACKS,T1,T2,formName,hasLook,type Track,type EvoEvent} from './evolve.ts';
 
 export type RogueHooks={sfx:(k:'attack'|'win'|'lose'|'spawn'|'base')=>void;exit:()=>void};
 type Menu='main'|'skill'|'item'|'foe'|'ally';
@@ -18,20 +17,20 @@ const pct=(a:number,b:number)=>Math.max(0,Math.min(100,Math.round(100*a/Math.max
 const img=(key:string,cls='')=>`<img class="${cls}" alt="" decoding="async" src="${artURL(key)}">`;
 
 let root:HTMLElement,run:RunState,hooks:RogueHooks;
-const ui={sel:-1,sheet:'' as ''|'items'|'quit'|'itemTarget'|'member',sheetI:0,evo:null as null|{list:EvoEvent[];idx:number},evoSeen:false,sheetItem:'',menu:'main' as Menu,cur:0,cmds:[] as (Cmd|undefined)[],pending:null as null|{t:'attack'}|{t:'skill';skill:string}|{t:'item';item:string},busy:false,fast:false,log:[] as string[],toast:'',vis:null as Vis|null,result:false};
+const ui={sel:-1,sheet:'' as ''|'items'|'quit'|'itemTarget'|'member',sheetI:0,evo:null as null|{list:EvoEvent[];idx:number},evoSeen:false,mapV:{k:1,cx:null as number|null,cy:null as number|null},noClick:0,msgOff:false,msgT:0 as number,sheetItem:'',menu:'main' as Menu,cur:0,cmds:[] as (Cmd|undefined)[],pending:null as null|{t:'attack'}|{t:'skill';skill:string}|{t:'item';item:string},busy:false,fast:false,log:[] as string[],toast:'',vis:null as Vis|null,result:false};
 const save=()=>{if(run.phase==='over'||run.phase==='clear')clearRun();else saveRun(run);};
 
 export function openRogue(h:RogueHooks,resume:boolean){hooks=h;
- let el=document.getElementById('rogue');if(!el){el=document.createElement('div');el.id='rogue';el.className='rg';document.body.append(el);el.addEventListener('click',onClick);new ResizeObserver(()=>layoutMap()).observe(el);}
+ let el=document.getElementById('rogue');if(!el){el=document.createElement('div');el.id='rogue';el.className='rg';document.body.append(el);el.addEventListener('click',onClick);el.addEventListener('wheel',mapWheel,{passive:false});for(const t of ['pointerdown','pointermove','pointerup','pointercancel'])el.addEventListener(t,mapPointer as EventListener);new ResizeObserver(()=>layoutMap()).observe(el);}
  root=el;root.hidden=false;document.documentElement.classList.add('rogue-open');
- const saved=resume?loadRun():null;run=saved??newRun();Object.assign(ui,{evo:null,evoSeen:false,sel:-1,sheet:'',menu:'main',cur:0,cmds:[],pending:null,busy:false,log:[],toast:'',vis:null,result:false});
+ const saved=resume?loadRun():null;run=saved??newRun();Object.assign(ui,{mapV:{k:1,cx:null,cy:null},msgOff:false,evo:null,evoSeen:false,sel:-1,sheet:'',menu:'main',cur:0,cmds:[],pending:null,busy:false,log:[],toast:'',vis:null,result:false});
  if(!saved){clearRun();ui.toast='遠征のはじまり！ 7日ごとにボスが待っている。';}
  save();render();}
 export function closeRogue(){if(root)root.hidden=true;document.documentElement.classList.remove('rogue-open');}
 
 // ---------- shared pieces ----------
 const bar=(a:number,b:number,cls='')=>`<i class="rg-bar ${cls}"><b style="width:${pct(a,b)}%"></b></i>`;
-const evoCls=(m:Member)=>{const e=m.evo;return e&&e.tier?`evo evo-${e.path} t${e.tier}`:'';};
+const evoCls=(m:Member)=>{const e=m.evo;return e&&e.tier&&!e.plain?`evo evo-${e.path} t${e.tier}`:'';};
 const evMini=(m:Member)=>{const e=evoOf(m);return e.tier?`<span class="rg-ev" style="color:${PATH[e.path as Track].color}">${'★'.repeat(e.tier)}${PATH[e.path as Track].mark}</span>`:`<span class="rg-ev">${TRACKS.map(t=>`${PATH[t].mark}${e[t]}`).join(' ')}</span>`;};
 function partyCards(compact=false){return `<div class="rg-cards ${compact?'compact':''}">${run.party.map((m,i)=>`<button class="rg-card ${m.hp<=0?'ko':''}" data-rg="member" data-i="${i}" aria-label="${m.name} レベル${m.level} HP${m.hp}/${m.maxHp} 詳細">${img(m.art,'rg-face '+evoCls(m))}<span class="rg-nm">${m.name}<small>Lv${m.level}</small></span>${bar(m.hp,m.maxHp)}<span class="rg-num">HP ${m.hp}/${m.maxHp}　気力 ${m.mp}/${m.maxMp}</span>${evMini(m)}</button>`).join('')}</div>`;}
 const chips=()=>`<div class="rg-chips">${run.party.map((m,i)=>`<button class="rg-chip ${m.hp<=0?'ko':''}" data-rg="member" data-i="${i}" aria-label="${m.name} 詳細">${img(m.art,'rg-face '+evoCls(m))}<span><b>${m.name}</b>${bar(m.hp,m.maxHp)}<small>${m.hp}/${m.maxHp}</small></span></button>`).join('')}</div>`;
@@ -51,47 +50,68 @@ function render(){if(!root||root.hidden)return;
  const f=root.querySelector<HTMLElement>('[data-autofocus]');if(f&&!ui.busy)f.focus({preventScroll:true});}
 
 function mapHTML(){const bossDay=run.day>=DAYS,b=BOSSES[run.chapter-1],sel=run.nodes[ui.sel];
- const nodes=run.nodes.map((n,i)=>{const p=PLACE_LOCATIONS[i],k=KIND[n.kind];return `<button class="rg-node k-${n.kind} ${n.visited?'done':''} ${ui.sel===i?'sel':''}" data-x="${p.x}" data-y="${p.y}" data-rg="node" data-i="${i}" ${n.visited||bossDay?'disabled':''} aria-label="${LANDMARKS[i].name} ${k.n}${n.visited?' 訪問済み':''}" aria-pressed="${ui.sel===i}"><b>${n.visited?'✓':k.l}</b><span class="lab">${LANDMARKS[i].name}</span></button>`;}).join('');
+ const nodes=run.nodes.map((n,i)=>{const p=SPOTS[i],k=KIND[n.kind];return `<button class="rg-node k-${n.kind} ${n.visited?'done':''} ${ui.sel===i?'sel':''}" data-x="${p.x}" data-y="${p.y}" data-rg="node" data-i="${i}" ${n.visited||bossDay?'disabled':''} aria-label="${SPOTS[i].name} ${k.n}${n.visited?' 訪問済み':''}" aria-pressed="${ui.sel===i}"><b>${n.visited?'✓':k.l}</b><span class="lab">${SPOTS[i].name}</span></button>`;}).join('');
  const bp=MISSION_LOCATIONS[run.chapter-1];
  const boss=`<button class="rg-node k-boss ${bossDay?'ready':''}" data-x="${bp.x}" data-y="${bp.y}" data-rg="${bossDay?'boss':'bossHint'}" aria-label="${BOSS_PLACE[run.chapter-1]} ボス ${b.name}"><b>${b.title==='ラスボス'?'王':'ボス'}</b><span class="lab">${BOSS_PLACE[run.chapter-1]}</span></button>`;
  let info:string;
  if(bossDay)info=`<div class="rg-info">${toastEl()}<strong>${DAYS}日目 — ${b.title}「${b.name}」が待っている！</strong><span>準備ができたら向かおう。</span></div><button class="rg-go" data-rg="boss" data-autofocus>ボスにいどむ</button>`;
- else if(sel){const k=KIND[sel.kind],foes=sel.foes.length?`<span>敵：${sel.foes.map(id=>nameOf(id)).join('・')}</span>`:`<span>${k.d}</span>`;info=`<div class="rg-info">${toastEl()}<strong>${LANDMARKS[ui.sel].name}：${k.n}</strong>${foes}</div><button class="rg-go" data-rg="go" data-autofocus>ここへ行く <small>(1日すすむ)</small></button>`;}
+ else if(sel){const k=KIND[sel.kind],foes=sel.foes.length?`<span>敵：${sel.foes.map(id=>nameOf(id)).join('・')}</span>`:`<span>${k.d}</span>`;info=`<div class="rg-info">${toastEl()}<strong>${SPOTS[ui.sel].name}：${k.n}</strong>${foes}</div><button class="rg-go" data-rg="go" data-autofocus>ここへ行く <small>(1日すすむ)</small></button>`;}
  else info=`<div class="rg-info">${toastEl()}<strong>行き先を選ぼう</strong><span>行動すると1日すすむ。${DAYS}日目にボス。行動のくせで仲間が進化する！</span></div>`;
- return `<div class="rg rg-mapscreen">${topbar(`<button class="rg-small" data-rg="items">どうぐ</button><button class="rg-small" data-rg="quit">やめる</button>`)}<div class="rg-mapview" id="rg-mapview"><img class="rg-mapbg" alt="" src="${APPROVED_ART.map}"><img class="rg-mapimg" alt="神栖の地図" src="${APPROVED_ART.map}">${nodes}${boss}</div><footer class="rg-foot rg-mapfoot">${chips()}${info}</footer></div>`;}
+ return `<div class="rg rg-mapscreen">${topbar(`<button class="rg-small" data-rg="items">どうぐ</button><button class="rg-small" data-rg="quit">やめる</button>`)}<div class="rg-mapview" id="rg-mapview"><img class="rg-mapbg" alt="" src="${APPROVED_ART.map}"><img class="rg-mapimg" alt="神栖の地図" src="${APPROVED_ART.map}">${nodes}${boss}<div class="rg-zoom" role="group" aria-label="地図のひょうじ"><button data-rg="zoomIn" aria-label="拡大">＋</button><button data-rg="zoomOut" aria-label="縮小">－</button><button data-rg="zoomReset">全体</button></div><p class="rg-zoomhint">ドラッグでいどう・ピンチで拡大縮小</p></div><footer class="rg-foot rg-mapfoot">${chips()}${info}</footer></div>`;}
 type R={x:number;y:number;w:number;h:number};
 const hit=(a:R,b:R)=>a.x<b.x+b.w&&b.x<a.x+a.w&&a.y<b.y+b.h&&b.y<a.y+a.h;
-/** Fit the illustrated map to the free area (cropping empty edges), then put every label where it covers no mark or other label. */
-function layoutMap(){const v=root?.querySelector<HTMLElement>('#rg-mapview');if(!v)return;const W=v.clientWidth,H=v.clientHeight;if(!W||!H)return;
- const IW=1024,IH=683,ns=Array.from(v.querySelectorAll<HTMLElement>('.rg-node'));
- const P=ns.map(n=>({x:+n.dataset.x!/100*IW,y:+n.dataset.y!/100*IH}));
+const IW=1024,IH=683,KMAX=4;
+function mapBase(W:number,H:number,P:{x:number;y:number}[]){
  const x0=Math.min(...P.map(p=>p.x)),x1=Math.max(...P.map(p=>p.x)),y0=Math.min(...P.map(p=>p.y)),y1=Math.max(...P.map(p=>p.y));
- const mx=58,my=34,fit=Math.min((W-2*mx)/Math.max(40,x1-x0),(H-2*my)/Math.max(40,y1-y0));
- const sCover=Math.max(W/IW,H/IH),sMin=Math.min(W/IW,H/IH),s=Math.max(sMin,Math.min(fit,sCover*1.3));
- const iw=IW*s,ih=IH*s;let ox=W/2-(x0+x1)/2*s,oy=H/2-(y0+y1)/2*s;
- ox=iw>=W?Math.min(0,Math.max(W-iw,ox)):(W-iw)/2;oy=ih>=H?Math.min(0,Math.max(H-ih,oy)):(H-ih)/2;
- Object.assign(v.querySelector<HTMLElement>('.rg-mapimg')!.style,{left:ox+'px',top:oy+'px',width:iw+'px',height:ih+'px'});
- const C=ns.map((n,i)=>{const px=ox+P[i].x*s,py=oy+P[i].y*s;n.style.left=px+'px';n.style.top=py+'px';return {n,px,py,r:n.offsetWidth/2};});
+ const fit=Math.min((W-116)/Math.max(40,x1-x0),(H-68)/Math.max(40,y1-y0)),sCover=Math.max(W/IW,H/IH),sMin=Math.min(W/IW,H/IH);
+ return {s:Math.max(sMin,Math.min(fit,sCover*1.3)),cx:(x0+x1)/2,cy:(y0+y1)/2,sMin};}
+function mapState(v:HTMLElement){const W=v.clientWidth,H=v.clientHeight,P=Array.from(v.querySelectorAll<HTMLElement>('.rg-node')).map(n=>({x:+n.dataset.x!/100*IW,y:+n.dataset.y!/100*IH}));
+ const b=mapBase(W,H,P),kMin=Math.min(1,b.sMin*.95/b.s),k=Math.max(kMin,Math.min(KMAX,ui.mapV.k)),cx=Math.max(0,Math.min(IW,ui.mapV.cx??b.cx)),cy=Math.max(0,Math.min(IH,ui.mapV.cy??b.cy));
+ return {W,H,P,S:b.s*k,k,cx,cy,kMin,s0:b.s};}
+/** Draw the map at the current zoom/pan, then put every label where it covers no mark or other label. */
+function layoutMap(){const v=root?.querySelector<HTMLElement>('#rg-mapview');if(!v||!v.clientWidth||!v.clientHeight)return;
+ const m=mapState(v),{W,H,P,S,cx,cy}=m,ns=Array.from(v.querySelectorAll<HTMLElement>('.rg-node'));
+ const ox=W/2-cx*S,oy=H/2-cy*S;
+ Object.assign(v.querySelector<HTMLElement>('.rg-mapimg')!.style,{left:ox+'px',top:oy+'px',width:IW*S+'px',height:IH*S+'px'});
+ const C=ns.map((n,i)=>{const px=ox+P[i].x*S,py=oy+P[i].y*S;n.style.left=px+'px';n.style.top=py+'px';n.hidden=px<-30||py<-30||px>W+30||py>H+30;return {n,px,py,r:n.offsetWidth/2};});
  const circles:R[]=C.map(c=>({x:c.px-c.r-2,y:c.py-c.r-2,w:c.r*2+4,h:c.r*2+4})),placed:R[]=[];
- C.forEach((c,i)=>{const lab=c.n.querySelector<HTMLElement>('.lab')!,w=lab.offsetWidth,h=lab.offsetHeight,g=3;
+ C.forEach((c,i)=>{if(c.n.hidden)return;const lab=c.n.querySelector<HTMLElement>('.lab')!,w=lab.offsetWidth,h=lab.offsetHeight,g=3;
   const cand:R[]=[{x:c.px-w/2,y:c.py+c.r+g,w,h},{x:c.px-w/2,y:c.py-c.r-g-h,w,h},{x:c.px+c.r+g,y:c.py-h/2,w,h},{x:c.px-c.r-g-w,y:c.py-h/2,w,h}];
   const inside=(r:R)=>r.x>=2&&r.y>=2&&r.x+r.w<=W-2&&r.y+r.h<=H-2,clear=(r:R)=>!circles.some((q,j)=>j!==i&&hit(r,q)),free=(r:R)=>!placed.some(q=>hit(r,q));
   const pick=cand.find(r=>inside(r)&&clear(r)&&free(r))??cand.find(r=>inside(r)&&clear(r))??cand[0];
   placed.push(pick);lab.style.left=(pick.x-(c.px-c.r))+'px';lab.style.top=(pick.y-(c.py-c.r))+'px';});}
+/** Zoom keeping the image point under (mx,my) fixed. */
+function zoomAt(k:number,mx:number,my:number){const v=root.querySelector<HTMLElement>('#rg-mapview');if(!v)return;const m=mapState(v);
+ const nk=Math.max(m.kMin,Math.min(KMAX,k)),wx=m.cx+(mx-m.W/2)/m.S,wy=m.cy+(my-m.H/2)/m.S,S2=m.s0*nk;
+ ui.mapV={k:nk,cx:wx-(mx-m.W/2)/S2,cy:wy-(my-m.H/2)/S2};layoutMap();}
+const ptrs=new Map<number,{x:number;y:number}>();let g0:null|{d:number;k:number;wx:number;wy:number;sx:number;sy:number;cx:number;cy:number;moved:boolean}=null;
+function gestureStart(){const v=root.querySelector<HTMLElement>('#rg-mapview');if(!v||!ptrs.size){g0=null;return;}const m=mapState(v),r=v.getBoundingClientRect(),a=[...ptrs.values()];
+ const mx=a.reduce((t,q)=>t+q.x,0)/a.length-r.left,my=a.reduce((t,q)=>t+q.y,0)/a.length-r.top;
+ g0={d:a.length>1?Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y):0,k:m.k,wx:m.cx+(mx-m.W/2)/m.S,wy:m.cy+(my-m.H/2)/m.S,sx:mx,sy:my,cx:m.cx,cy:m.cy,moved:g0?.moved??false};}
+function gestureMove(){const v=root.querySelector<HTMLElement>('#rg-mapview');if(!v||!g0||!ptrs.size)return;const m=mapState(v),r=v.getBoundingClientRect(),a=[...ptrs.values()];
+ const mx=a.reduce((t,q)=>t+q.x,0)/a.length-r.left,my=a.reduce((t,q)=>t+q.y,0)/a.length-r.top;
+ if(a.length>1&&g0.d){const k=Math.max(m.kMin,Math.min(KMAX,g0.k*Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y)/g0.d)),S2=m.s0*k;g0.moved=true;ui.mapV={k,cx:g0.wx-(mx-m.W/2)/S2,cy:g0.wy-(my-m.H/2)/S2};layoutMap();return;}
+ if(!g0.moved&&Math.hypot(mx-g0.sx,my-g0.sy)<6)return;g0.moved=true;ui.mapV={k:m.k,cx:g0.wx-(mx-m.W/2)/m.S,cy:g0.wy-(my-m.H/2)/m.S};layoutMap();}
+function mapPointer(e:PointerEvent){const t=e.target as HTMLElement;
+ if(e.type==='pointerdown'){if(!t.closest('#rg-mapview')||t.closest('.rg-zoom'))return;ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});gestureStart();return;}
+ if(!ptrs.has(e.pointerId))return;
+ if(e.type==='pointermove'){ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});gestureMove();return;}
+ if(g0?.moved)ui.noClick=Date.now()+350;ptrs.delete(e.pointerId);if(ptrs.size)gestureStart();else g0=null;}
+function mapWheel(e:WheelEvent){const v=root.querySelector<HTMLElement>('#rg-mapview');if(!v||!(e.target as HTMLElement).closest('#rg-mapview'))return;e.preventDefault();const r=v.getBoundingClientRect(),m=mapState(v);zoomAt(m.k*Math.exp(-e.deltaY*(e.ctrlKey?.01:.0016)),e.clientX-r.left,e.clientY-r.top);}
+
 const toastEl=()=>ui.toast?`<em class="rg-toast" role="status">${ui.toast}</em>`:'';
 const nameOf=(id:string)=>FOE_NAMES[id]??id;
-import {FOES} from './data.ts';
 const FOE_NAMES:Record<string,string>=Object.fromEntries(Object.entries(FOES).map(([k,v])=>[k,v.name]));
 
-function eventHTML(){const ev=run.event!,def=EVENTS.find(e=>e.id===ev.id)!,place=LANDMARKS[run.lastPlace]?.name??'';
+function eventHTML(){const ev=run.event!,def=EVENTS.find(e=>e.id===ev.id)!,place=SPOTS[run.lastPlace]?.name??'';
  const body=ev.done?`<p class="rg-line" role="status">${ev.text}</p><button class="rg-go" data-rg="evDone" data-autofocus>つづける</button>`:`<p class="rg-line">${def.text}</p><div class="rg-choices">${def.choices.map((c,i)=>`<button data-rg="evPick" data-i="${i}" ${i===0?'data-autofocus':''}>${c.label}</button>`).join('')}</div>`;
- return `<div class="rg">${topbar()}${scene(PLACE_BG[run.lastPlace]??'town',`<section class="rg-panel"><small>${place}</small><h2>${def.title}</h2><div class="rg-talk">${faceHTML({speaker:'kiki',emotion:ev.done?'smile':'surprised'},import.meta.env.BASE_URL)}${faceHTML({speaker:'nene',emotion:ev.done?'smile':'normal'},import.meta.env.BASE_URL)}</div>${body}<small class="rg-note">創作のお話です。実在の出来事ではありません。</small></section>`)}<footer class="rg-foot">${partyCards(true)}</footer></div>`;}
+ return `<div class="rg">${topbar()}${scene(PLACE_BG[run.lastPlace]??'town',`<section class="rg-panel"><small>${place}</small><h2>${def.title}</h2><div class="rg-talk">${faceHTML({speaker:'kiki',emotion:ev.done?'smile':'surprised'},import.meta.env.BASE_URL)}${faceHTML({speaker:'nene',emotion:ev.done?'smile':'normal'},import.meta.env.BASE_URL)}</div>${body}<small class="rg-note">創作のお話です。実在の出来事ではありません。</small></section>`)}<footer class="rg-foot">${chips()}</footer></div>`;}
 
-function shopHTML(){const place=LANDMARKS[run.lastPlace]?.name??'';
- return `<div class="rg">${topbar()}${scene(PLACE_BG[run.lastPlace]??'town',`<section class="rg-panel"><small>${place}</small><h2>ねこの よろず屋</h2><ul class="rg-shop">${run.shop!.offers.map(id=>{const it=ITEMS[id],have=run.items[id]??0,can=run.gold>=it.price&&have<9;return `<li><span><b>${it.name}</b><small>${it.note}　持っている：${have}</small></span><button data-rg="buy" data-id="${id}" ${can?'':'disabled'}>${it.price}</button></li>`;}).join('')}</ul><button class="rg-go" data-rg="leave" data-autofocus>でていく</button></section>`)}<footer class="rg-foot">${partyCards(true)}</footer></div>`;}
+function shopHTML(){const place=SPOTS[run.lastPlace]?.name??'';
+ return `<div class="rg">${topbar()}${scene(PLACE_BG[run.lastPlace]??'town',`<section class="rg-panel"><small>${place}</small><h2>ねこの よろず屋</h2><ul class="rg-shop">${run.shop!.offers.map(id=>{const it=ITEMS[id],have=run.items[id]??0,can=run.gold>=it.price&&have<9;return `<li><span><b>${it.name}</b><small>${it.note}　持っている：${have}</small></span><button data-rg="buy" data-id="${id}" ${can?'':'disabled'}>${it.price}</button></li>`;}).join('')}</ul><button class="rg-go" data-rg="leave" data-autofocus>でていく</button></section>`)}<footer class="rg-foot">${chips()}</footer></div>`;}
 
 function rewardHTML(){const opts=run.reward!;
- return `<div class="rg">${topbar()}${scene(BOSS_BG[run.chapter-1],`<section class="rg-panel wide"><small>${BOSSES[run.chapter-1].title}をたおした！</small><h2>ごほうびを1つ えらぼう</h2><div class="rg-rewards">${opts.map((o,i)=>o.kind==='perk'?(()=>{const p=PERKS.find(x=>x.id===o.id)!;return `<button data-rg="reward" data-i="${i}" ${i===0?'data-autofocus':''}><b>${p.name}</b><span>${p.note}</span></button>`;})():(()=>{const m=MEMBERS[o.id];return `<button data-rg="reward" data-i="${i}">${img(m.art,'rg-face')}<b>${m.name}が仲間になる</b><span>${m.blurb}</span></button>`;})()).join('')}</div><small class="rg-note">選ぶと全員のHPが少し回復して、次の週がはじまる。</small></section>`)}<footer class="rg-foot">${partyCards(true)}</footer></div>`;}
+ return `<div class="rg">${topbar()}${scene(BOSS_BG[run.chapter-1],`<section class="rg-panel wide"><small>${BOSSES[run.chapter-1].title}をたおした！</small><h2>ごほうびを1つ えらぼう</h2><div class="rg-rewards">${opts.map((o,i)=>o.kind==='perk'?(()=>{const p=PERKS.find(x=>x.id===o.id)!;return `<button data-rg="reward" data-i="${i}" ${i===0?'data-autofocus':''}><b>${p.name}</b><span>${p.note}</span></button>`;})():(()=>{const m=MEMBERS[o.id];return `<button data-rg="reward" data-i="${i}">${img(m.art,'rg-face')}<b>${m.name}が仲間になる</b><span>${m.blurb}</span></button>`;})()).join('')}</div><small class="rg-note">選ぶと全員のHPが少し回復して、次の週がはじまる。</small></section>`)}<footer class="rg-foot">${chips()}</footer></div>`;}
 
 function endHTML(){const win=run.phase==='clear',best=loadBest();
  return `<div class="rg">${scene(win?'town':'port',`<section class="rg-panel wide end ${win?'win':'lose'}"><h2>${win?'神栖は守られた！':'遠征は ここまで…'}</h2><p class="rg-line">${win?'ラスボスをたおして、3週間の遠征をやりとげた。':`第${run.chapter}週 ${Math.min(run.day,DAYS)}日目で、みんなたおれてしまった。`}</p><ul class="rg-stats"><li>すすんだ日数 <b>${run.stats.days}</b></li><li>戦闘 <b>${run.stats.battles}</b>回</li><li>ターン <b>${run.stats.turns}</b></li><li>クリア <b>${best.clears}</b>回 / 挑戦 <b>${best.runs}</b>回</li></ul><div class="rg-choices"><button data-rg="again" data-autofocus>もういちど遠征へ</button><button data-rg="title">タイトルへ</button></div></section>`)}</div>`;}
@@ -99,7 +119,7 @@ function endHTML(){const win=run.phase==='clear',best=loadBest();
 function memberSheet(){const m=run.party[ui.sheetI];if(!m)return '';const e=evoOf(m),base=MEMBERS[m.id];
  const rows=TRACKS.map(t=>{const P=PATH[t],n=e[t],target=e.tier===0?T1:e.tier===1&&e.path===t?T2:0,tier=(e.tier===0?1:2) as 1|2,mine=e.path===t,dim=e.tier>0&&!mine;
   const pips=target?Array.from({length:target},(_,i)=>`<i class="${i<n?'on':''}"></i>`).join(''):'';
-  const next=target?`→ <b>${formName(m.id,base.name,t,tier)}</b>（わざ：${SKILLS[P.skills[tier-1]].name}）`:(mine&&e.tier===2?'最終しんか！':'');
+  const next=target?(hasLook(m.id,t)?`→ <b>${formName(m.id,base.name,t,tier)}</b>（わざ：${SKILLS[P.skills[tier-1]].name}）`:'→ レベルが1上がる'):(mine&&e.tier===2?'最終しんか！':'');
   return `<li class="${dim?'dim':''}" style="--c:${P.color}"><span class="mk">${P.mark}</span><div><b>${P.label}</b><small>${P.hint}</small><span class="pips">${pips}<em>${n}回</em></span><small>${next}</small></div></li>`;}).join('');
  return `<div class="rg-sheet" role="dialog" aria-label="${m.name}"><div class="rg-msheet"><div class="rg-mhead">${img(m.art,'rg-face '+evoCls(m))}<div><h3>${m.name} <small>Lv${m.level}${e.tier?' '+'★'.repeat(e.tier):''}</small></h3><p>HP ${m.hp}/${m.maxHp}　気力 ${m.mp}/${m.maxMp}<br>こうげき ${m.atk}　ぼうぎょ ${m.def}　すばやさ ${m.spd}</p></div></div><h4>おぼえているわざ</h4><ul class="rg-sk">${m.skills.map(id=>SKILLS[id]).map(k=>`<li><b>${k.name}</b><small>気力${k.cost}・${k.note}</small></li>`).join('')}</ul><h4>しんかの道（3回くり返すと進化）</h4><ul class="rg-path">${rows}</ul><button data-rg="sheetClose" data-autofocus>とじる</button></div></div>`;}
 function sheetHTML(){if(ui.sheet==='member')return memberSheet();
@@ -120,7 +140,7 @@ function stageHTML(){const b=run.battle!,v=ui.vis!;
 const msgHTML=()=>ui.log.slice(-2).map(l=>`<p>${l}</p>`).join('');
 function battleHTML(){const b=run.battle!;if(!ui.vis)ui.vis=snapshot();
  const bg=b.boss?BOSS_BG[run.chapter-1]:PLACE_BG[run.lastPlace]??'town';
- return `<div class="rg rg-battle" style="--bg:url('${artURL(bg)}')"><div class="rg-stage" id="rg-stage">${stageHTML()}<div class="rg-banner">${b.boss?`ボス戦 — ${b.foes.find(f=>f.boss)?.name??''}`:`第${run.chapter}週 ${Math.max(1,Math.min(run.day,DAYS+1)-1)}日目`}<small>ターン ${b.round}</small></div><div class="rg-msg" id="rg-msg" aria-live="polite">${msgHTML()}</div></div><div class="rg-ui"><div class="rg-win"><div class="rg-cmd" id="rg-cmd">${cmdHTML()}</div><div class="rg-stat" id="rg-stat">${statHTML()}</div></div></div></div>`;}
+ return `<div class="rg rg-battle" style="--bg:url('${artURL(bg)}')"><div class="rg-stage" id="rg-stage">${stageHTML()}<div class="rg-banner">${b.boss?`ボス戦 — ${b.foes.find(f=>f.boss)?.name??''}`:`第${run.chapter}週 ${Math.max(1,Math.min(run.day,DAYS+1)-1)}日目`}<small>ターン ${b.round}</small></div><div class="rg-msg ${ui.msgOff?'off':''}" id="rg-msg" aria-live="polite">${msgHTML()}</div></div><div class="rg-ui"><div class="rg-win"><div class="rg-cmd" id="rg-cmd">${cmdHTML()}</div><div class="rg-stat" id="rg-stat">${statHTML()}</div></div></div></div>`;}
 function statHTML(){const v=ui.vis!;return run.party.map((m,i)=>{const hp=v.hp[i]??m.hp,mp=v.mp[i]??m.mp,cur=!ui.busy&&!run.battle?.over&&ui.cur===i,e=m.evo;return `<div class="rg-row ${cur?'cur':''} ${hp<=0?'ko':''}"><span class="nm">${m.name}<small>Lv${m.level}${e&&e.tier?' '+'★'.repeat(e.tier):''}</small></span><span class="n">${hp}<small>/${m.maxHp}</small></span><span class="n mp">${mp}<small>気力</small></span>${bar(hp,m.maxHp)}</div>`;}).join('');}
 function cmdHTML():string{const b=run.battle!;
  if(b.over){const r=b.rewards;const evo=r?.evos?.length?`<p class="lv">✨ ${r.evos.map(x=>x.before.name).join('・')} が進化できる！</p>`:'';return b.over==='win'&&r?`<h3>勝利！</h3><p>かつおぶし +${r.gold}　経験値 +${r.xp}${r.items.length?`　${r.items.map(i=>ITEMS[i].name).join('・')}を入手`:''}</p>${r.levelUps.length?`<p class="lv">${r.levelUps.join('　')} にレベルアップ！</p>`:''}${evo}<button class="rg-go" data-rg="after" data-autofocus>つづける</button>`:b.over==='fled'?`<h3>にげのびた</h3><button class="rg-go" data-rg="after" data-autofocus>つづける</button>`:`<h3>ぜんめつ…</h3><button class="rg-go" data-rg="after" data-autofocus>つづける</button>`;}
@@ -134,7 +154,7 @@ function cmdHTML():string{const b=run.battle!;
 const firstLiving=()=>run.party.findIndex(m=>m.hp>0);
 function refresh(){const c=root.querySelector('#rg-cmd'),s=root.querySelector('#rg-stat'),st=root.querySelector('#rg-stage');if(!c||!run.battle)return render();
  c.innerHTML=cmdHTML();s!.innerHTML=statHTML();st!.querySelectorAll('.rg-foes,.rg-party').forEach(e=>e.remove());st!.insertAdjacentHTML('afterbegin',stageHTML());const f=c.querySelector<HTMLElement>('[data-autofocus]');f?.focus({preventScroll:true});}
-function say(text:string){ui.log.push(text);if(ui.log.length>30)ui.log.shift();const m=root.querySelector('#rg-msg');if(m)m.innerHTML=msgHTML();}
+function say(text:string){ui.log.push(text);if(ui.log.length>30)ui.log.shift();ui.msgOff=false;const m=root.querySelector('#rg-msg');if(m){m.innerHTML=msgHTML();m.classList.remove('off');}clearTimeout(ui.msgT);ui.msgT=window.setTimeout(()=>{ui.msgOff=true;root.querySelector('#rg-msg')?.classList.add('off');},reduced()?1500:2400);}
 
 function submit(cmd:Cmd){ui.cmds[ui.cur]=cmd;ui.menu='main';ui.pending=null;
  let next=ui.cur+1;while(next<run.party.length&&run.party[next].hp<=0)next++;
@@ -171,9 +191,10 @@ function onClick(ev:Event){const el=(ev.target as HTMLElement).closest<HTMLEleme
  if(ui.busy&&a!=='fast')return;
  const b=run.battle;
  switch(a){
-  case 'node':ui.sel=ui.sel===i?-1:i;ui.toast='';return render();
+  case 'zoomIn':case 'zoomOut':case 'zoomReset':{const v=root.querySelector<HTMLElement>('#rg-mapview');if(!v)return;if(a==='zoomReset'){ui.mapV={k:1,cx:null,cy:null};return layoutMap();}const m=mapState(v);return zoomAt(m.k*(a==='zoomIn'?1.5:1/1.5),m.W/2,m.H/2);}
+  case 'node':if(Date.now()<ui.noClick)return;ui.sel=ui.sel===i?-1:i;ui.toast='';return render();
   case 'go':if(ui.sel>=0&&visit(run,ui.sel)){const k=run.nodes[ui.sel].kind;ui.sel=-1;ui.toast='';ui.vis=null;ui.evoSeen=false;ui.log=[];ui.cur=0;ui.cmds=[];ui.menu='main';if(k==='rest'){rest(run);ui.toast='ゆっくり休んで、HPと気力がかいふくした。';}save();render();}return;
-  case 'boss':if(startBoss(run)){ui.vis=null;ui.log=[];ui.cur=0;ui.cmds=[];ui.menu='main';ui.sel=-1;save();render();}return;
+  case 'boss':if(Date.now()<ui.noClick)return;if(startBoss(run)){ui.vis=null;ui.log=[];ui.cur=0;ui.cmds=[];ui.menu='main';ui.sel=-1;save();render();}return;
   case 'bossHint':ui.toast=`${DAYS}日目になるとボスに挑める。それまでに仲間とどうぐを整えよう。`;return render();
   case 'items':ui.sheet='items';return render();
   case 'quit':ui.sheet='quit';return render();

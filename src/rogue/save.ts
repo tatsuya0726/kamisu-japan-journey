@@ -2,7 +2,7 @@ import type {RunState} from './engine.ts';
 export const RUN_KEY='kamisu.rogue.run.v1',BEST_KEY='kamisu.rogue.best.v1';
 export type Best={v:1;runs:number;clears:number;bestDays:number};
 const store=()=>{try{return localStorage;}catch{return undefined;}};
-export function decodeRun(raw:string|null):RunState|null{try{const r=JSON.parse(raw??'null');if(r&&r.v===1&&Array.isArray(r.party)&&r.party.length&&Array.isArray(r.nodes)&&r.nodes.length===7&&typeof r.chapter==='number'&&r.chapter>=1&&r.chapter<=3&&typeof r.rng==='number'&&r.phase!=='over'&&r.phase!=='clear')return r as RunState;}catch{}return null;}
+export function decodeRun(raw:string|null):RunState|null{try{const r=JSON.parse(raw??'null');if(r&&r.v===1&&Array.isArray(r.party)&&r.party.length&&Array.isArray(r.nodes)&&(r.nodes.length===7||r.nodes.length===14)&&typeof r.chapter==='number'&&r.chapter>=1&&r.chapter<=3&&typeof r.rng==='number'&&r.phase!=='over'&&r.phase!=='clear')return r as RunState;}catch{}return null;}
 export function loadRun(){try{return decodeRun(store()?.getItem(RUN_KEY)??null);}catch{return null;}}
 export function saveRun(run:RunState){try{store()?.setItem(RUN_KEY,JSON.stringify(run));}catch{}}
 export function clearRun(){try{store()?.removeItem(RUN_KEY);}catch{}}

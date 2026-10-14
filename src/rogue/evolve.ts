@@ -1,6 +1,6 @@
 /** Evolution: a member's habits (attack / guard / support) decide how they evolve. Pure data + tiny helpers. */
 export type Track='fang'|'shell'|'heart';
-export type Evo={fang:number;shell:number;heart:number;path:''|Track;tier:0|1|2;ready:''|Track};
+export type Evo={fang:number;shell:number;heart:number;path:''|Track;tier:0|1|2;ready:''|Track;plain?:boolean};
 export const TRACKS:Track[]=['fang','shell','heart'];
 export const T1=3,T2=7;
 export type EvoStats={hp:number;atk:number;def:number;mp:number;spd:number};
@@ -15,10 +15,11 @@ const NAMES:Record<string,Partial<Record<Track,[string,string]>>>={
 };
 const ART:Record<string,Partial<Record<Track,string>>>={kiki:{fang:'kiki-sword',heart:'kiki-fish'},nene:{shell:'nene-guard',heart:'nene-wings'}};
 export const formName=(id:string,base:string,p:Track,tier:1|2)=>NAMES[id]?.[p]?.[tier-1]??PATH[p].prefix[tier-1]+base;
+export const hasLook=(id:string,p:Track)=>!!ART[id]?.[p];
 export const formArt=(id:string,baseArt:string,p:Track)=>ART[id]?.[p]??baseArt;
 export const evoOf=(m:{evo?:Evo}):Evo=>m.evo??(m.evo={fang:0,shell:0,heart:0,path:'',tier:0,ready:''});
 const NONE:EvoStats={hp:1,atk:1,def:1,mp:0,spd:0};
-export const evoStats=(m:{evo?:Evo}):EvoStats=>{const e=m.evo;return e&&e.path&&e.tier?PATH[e.path].stats[e.tier-1]:NONE;};
+export const evoStats=(m:{evo?:Evo}):EvoStats=>{const e=m.evo;return e&&e.path&&e.tier&&!e.plain?PATH[e.path].stats[e.tier-1]:NONE;};
 export function trackAct(m:{evo?:Evo},t:Track){const e=evoOf(m);e[t]++;
  if(e.tier===0&&!e.ready&&e[t]>=T1)e.ready=t;
  if(e.tier===1&&t===e.path&&e[t]>=T2)e.ready=t;}

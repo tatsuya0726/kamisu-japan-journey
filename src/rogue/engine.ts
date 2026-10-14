@@ -1,5 +1,5 @@
 /** Turn-based roguelike run engine. Deterministic for a given seed; mutates the RunState it is given. */
-import {evoOf,evoStats,trackAct,formName,formArt,PATH,type Evo,type EvoEvent,type Track} from './evolve.ts';
+import {evoOf,evoStats,trackAct,formName,formArt,hasLook,PATH,type Evo,type EvoEvent,type Track} from './evolve.ts';
 import {MEMBERS,SKILLS,FOES,BOSSES,PLACE_POOLS,CHAPTER,ITEMS,PERKS,EVENTS,RECRUITS,type FoeT,type Outcome} from './data.ts';
 
 /** Global foe damage tuning. */
@@ -49,7 +49,7 @@ function makeFoe(run:RunState,t:FoeT,ch:number,elite=false,boss=false,pattern?:s
  const hp=Math.round(t.hp*(boss?1:c.hp)*e.hp);return {uid:run.nextUid++,id:t.id,name:(elite?'強い ':'')+t.name,art:t.art,h:t.h,hp,maxHp:hp,atk:Math.round(t.atk*ATK_SCALE*(boss?1:c.atk)*e.atk),def:Math.round(t.def*(boss?1:c.def)),spd:t.spd,moves:t.moves,boss,pattern,turn:0,atkUp:0,guard:0,phase2:false,charging:false};}
 
 export function startChapter(run:RunState){
- const kinds:Kind[]=shuffle(run,['battle','battle','elite','event','rest','shop',randInt(run,2)?'battle':'event'] as Kind[]);
+ const kinds:Kind[]=shuffle(run,['battle','battle','battle','battle','battle','elite','elite','event','event','event','rest','rest','shop','shop'] as Kind[]);
  run.nodes=kinds.map((kind,place)=>{const n:Node={kind,visited:false,foes:[]};const pool=PLACE_POOLS[place];
   if(kind==='battle'||kind==='elite'){const count=kind==='elite'?3:2+(rand(run)<(run.chapter===1?.35:.7)?1:0);for(let i=0;i<count;i++)n.foes.push(pickOne(run,pool));}
   if(kind==='event')n.eventId=pickOne(run,EVENTS).id;
@@ -167,13 +167,15 @@ function foeAct(run:RunState,b:Battle,f:Foe,evs:Ev[]){
  evs.push({t:'msg',text:`${f.name}の${mv.n}！`});
  for(const t of targets){const m=t.m;let d=strike(run,f.atk*(f.atkUp>0?1.3:1),mv.p,m.def,(m.guard?.5:1)*(m.shield?m.shield.mul:1));m.hp=Math.max(0,m.hp-d);evs.push({t:'hit',from:me,to:refP(t.i),dmg:d,hp:m.hp,crit:false,name:mv.n});if(m.hp<=0)evs.push({t:'ko',who:refP(t.i)});}}
 
-export function checkEvolutions(run:RunState):EvoEvent[]{const out:EvoEvent[]=[];
+/** Habits that change a member's look become an evolution; the rest are just a normal level-up. */
+export function checkEvolutions(run:RunState):{evos:EvoEvent[];ups:string[]}{const evos:EvoEvent[]=[],ups:string[]=[];
  run.party.forEach((m,i)=>{const e=evoOf(m);if(!e.ready)return;const p=e.ready as Track,tier=(e.tier+1) as 1|2,t=MEMBERS[m.id];
+  if(!hasLook(m.id,p)){e.path=p;e.tier=tier;e.ready='';e.plain=true;if(m.level<LEVEL_MAX){m.level++;m.xp=0;recalc(run,m);if(m.hp>0)m.hp=Math.min(m.maxHp,m.hp+Math.round(m.maxHp*.1));ups.push(`${m.name} Lv${m.level}`);}return;}
   const snap=()=>({name:m.name,art:m.art,hp:m.maxHp,mp:m.maxMp,atk:m.atk,def:m.def,spd:m.spd,path:e.path as ''|Track,tier:e.tier});
   const before=snap();e.path=p;e.tier=tier;e.ready='';m.name=formName(m.id,t.name,p,tier);m.art=formArt(m.id,t.art,p);
   const sk=PATH[p].skills[tier-1];if(!m.skills.includes(sk))m.skills.push(sk);recalc(run,m);if(m.hp>0)m.hp=Math.min(m.maxHp,m.hp+Math.round(m.maxHp*.1));
-  out.push({i,before,after:{name:m.name,art:m.art,hp:m.maxHp,mp:m.maxMp,atk:m.atk,def:m.def,spd:m.spd,path:p,tier},skill:sk});});
- return out;}
+  evos.push({i,before,after:{name:m.name,art:m.art,hp:m.maxHp,mp:m.maxMp,atk:m.atk,def:m.def,spd:m.spd,path:p,tier},skill:sk});});
+ return {evos,ups};}
 
 function winBattle(run:RunState,b:Battle,evs:Ev[]){b.over='win';const ch=run.chapter;
  let gold=0,xp=0;for(const f of b.foes){xp+=f.boss?70+ch*20:Math.round((6+ch*3)*(b.elite?1.6:1));gold+=f.boss?30*ch:Math.round((4+ch*3)*(b.elite?1.8:1));}
@@ -181,7 +183,7 @@ function winBattle(run:RunState,b:Battle,evs:Ev[]){b.over='win';const ch=run.cha
  if(b.elite||(!b.boss&&rand(run)<.3)){const it=b.elite?pickOne(run,['onigiri','matatabi','kankan']):'onigiri';if((run.items[it]??0)<ITEM_MAX){run.items[it]=(run.items[it]??0)+1;items.push(it);}}
  const levelUps=gainXp(run,xp,evs);
  if(has(run,'purr'))for(const m of run.party)if(m.hp>0)m.hp=Math.min(m.maxHp,m.hp+Math.round(m.maxHp*.06));
- const evos=checkEvolutions(run);b.rewards={gold,xp,items,levelUps,evos};
+ const evo=checkEvolutions(run);b.rewards={gold,xp,items,levelUps:[...levelUps,...evo.ups],evos:evo.evos};
  if(b.boss){if(ch>=CHAPTERS)run.phase='clear';else{run.reward=rewardOptions(run);run.phase='reward';}}else run.phase='map';
  evs.push({t:'end',result:'win'});}
 

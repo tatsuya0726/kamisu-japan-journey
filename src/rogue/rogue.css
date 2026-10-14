@@ -160,3 +160,21 @@ img.evo.t2{filter:drop-shadow(0 0 9px var(--g)) drop-shadow(0 0 3px var(--g)) sa
 @media(prefers-reduced-motion:reduce){.rg-evo-stage .old{display:none}.rg-evo::after{display:none}}
 .rg-path{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.rg-path li{margin:0;flex-direction:column;gap:4px}.rg-msheet{width:min(680px,100%)}
 @media(max-height:430px){.rg-msheet{gap:2px;padding:8px 12px}.rg-msheet button{min-height:32px}}
+/* ===== v3: safe margins, message fade, map zoom, compact panels ===== */
+#rogue{inset:auto;top:0;left:0;width:100%;height:100%;height:100dvh;--sl:max(env(safe-area-inset-left),16px);--sr:max(env(safe-area-inset-right),16px);--st:max(env(safe-area-inset-top),8px);--sb:max(env(safe-area-inset-bottom),8px)}
+#rogue>.rg{inset:var(--st) var(--sr) var(--sb) var(--sl);border-radius:12px}
+.rg-sheet,.rg-evo{padding:var(--st) var(--sr) var(--sb) var(--sl)}
+.rg-ui{padding:6px 8px}.rg-foot{padding:6px 10px}
+.rg-msg{transition:opacity .5s}.rg-msg.off{opacity:0}
+.rg-mapview{touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab}
+.rg-mapview:active{cursor:grabbing}
+.rg-node[hidden]{display:none!important}
+.rg-zoom{position:absolute;right:8px;top:8px;display:flex;flex-direction:column;gap:6px;z-index:6}
+.rg-zoom button{min-height:40px!important;min-width:40px;padding:2px 8px!important;font-weight:900;background:#07141cd9!important}
+.rg-zoomhint{position:absolute;left:8px;top:8px;margin:0;background:#07141cb3;border-radius:8px;padding:2px 8px;font-size:.72em;pointer-events:none;z-index:6}
+.rg-chips{overflow-x:auto}
+.rg-panel{gap:6px;padding:10px 14px}.rg-shop li{gap:6px}.rg-shop button{min-width:56px}
+@media(max-height:480px){.rg-panel h2{font-size:1.2em}.rg-panel .rg-go{min-height:40px}.rg-talk img{height:clamp(36px,11vh,60px)}.rg-shop{gap:3px}}
+.rg button.rg-node{width:clamp(28px,5.4vh,42px);height:clamp(28px,5.4vh,42px)}
+.rg-node b{font-size:.95em;border-width:2px}.rg-node .lab{font-size:.72em}
+.rg-zoom button{min-height:34px!important;min-width:34px}

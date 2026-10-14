@@ -1,6 +1,7 @@
 /** Static content for the turn-based roguelike run ("遠征"). Pure data: no DOM, no randomness. */
 import pack from '../data/mission-pack.json' with {type:'json'};
 import {LANDMARKS} from '../local-walk.ts';
+import {PLACE_LOCATIONS} from '../mission-locations.ts';
 
 export type SkillT={id:string;name:string;cost:number;target:'foe'|'foes'|'ally'|'allies';kind:'dmg'|'heal'|'shield';power:number;hits?:number;mul?:number;turns?:number;note:string};
 export const SKILLS:Record<string,SkillT>={
@@ -66,8 +67,21 @@ export const BOSSES:BossT[]=[
 ];
 /** Normal foes available at each place, taken from that place's designed missions (bosses excluded). */
 const LOC_IDS=['ikisu_shrine','ishigami_kindergarten','karuno_elementary','thousand_people_gallery','kamisu_central_park','kamisu_disaster_arena','minato_park'];
-export const PLACE_POOLS:string[][]=LOC_IDS.map(l=>{const ids=new Set<string>();for(const m of pack.missions)if(m.location_id===l)for(const id of m.enemy_ids)if(FOES[id])ids.add(id);return [...ids];});
-export const PLACE_BG=LANDMARKS.map(l=>l.background);
+const BASE_POOLS:string[][]=LOC_IDS.map(l=>{const ids=new Set<string>();for(const m of pack.missions)if(m.location_id===l)for(const id of m.enemy_ids)if(FOES[id])ids.add(id);return [...ids];});
+/** Every place you can visit on the illustrated map. The first 7 are the original landmarks; the rest are generic, fictional spots. */
+export type Spot={name:string;bg:string;pool:number;x:number;y:number};
+export const SPOTS:Spot[]=[
+ ...LANDMARKS.map((l,i)=>({name:l.name,bg:l.background,pool:i,x:PLACE_LOCATIONS[i].x,y:PLACE_LOCATIONS[i].y})),
+ {name:'風車の丘',bg:'coast',pool:3,x:69,y:52},
+ {name:'漁港の市場',bg:'port-park',pool:6,x:82,y:70},
+ {name:'工場の見学路',bg:'port',pool:5,x:36,y:18},
+ {name:'大橋のたもと',bg:'town',pool:2,x:62,y:75},
+ {name:'キャンプ場',bg:'central-park',pool:4,x:59,y:40},
+ {name:'中洲の林',bg:'ikisu',pool:0,x:8,y:56},
+ {name:'北の集落',bg:'town',pool:1,x:14,y:7}
+];
+export const PLACE_POOLS:string[][]=SPOTS.map(s=>BASE_POOLS[s.pool]);
+export const PLACE_BG=SPOTS.map(s=>s.bg);
 export const BOSS_BG=['port','coast','town'];
 export const BOSS_PLACE=['鹿島港','波崎海岸','大野原のまち'];
 export const CHAPTER=[{hp:1,atk:1,def:1},{hp:1.55,atk:1.3,def:1.3},{hp:2.15,atk:1.6,def:1.6}];

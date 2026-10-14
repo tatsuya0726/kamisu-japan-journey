@@ -10,9 +10,9 @@ export const CAT_ART = {
   ]
 };
 export const APPROVED_ART = {
- silver: `${import.meta.env.BASE_URL}defense/approved/silver.png`,
- cream: `${import.meta.env.BASE_URL}defense/approved/cream.png`,
- map: `${import.meta.env.BASE_URL}defense/approved/kamisu-map.png`
+ silver: `${import.meta.env.BASE_URL}defense/runtime/silver.png`,
+ cream: `${import.meta.env.BASE_URL}defense/runtime/cream.png`,
+ map: `${import.meta.env.BASE_URL}defense/runtime/kamisu-map.png`
 };
 export const CAT_TIPS = [
  '少ないごはんで呼べる前衛。まずはこの子から。',

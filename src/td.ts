@@ -1,3 +1,4 @@
+import {mountMap} from './map-controls.ts';
 import {banterHTML} from './dialogue.ts';
 import {watchImages} from './image-loading.ts';
 import {pickStory,BANTER} from './cat-stories.ts';
@@ -16,7 +17,7 @@ const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 let assist=false,assistIndex=0,tv=false;
 try{tv=localStorage.getItem('kamisu.display.tv')==='true';}catch{}
 document.documentElement.classList.toggle('tv-safe',tv);
-function screen(p:MenuPage){modal.dataset.page=p;show(menu(p,progress.cleared,ready,started,portrait,tv,sound.prefs));}
+function screen(p:MenuPage){modal.dataset.page=p;show(menu(p,progress.cleared,ready,started,portrait,tv,sound.prefs));mountMap(modal);}
 function home(){screen('home');}
 function settings(){screen('settings');}
 let s=fresh(),progress=decodeProgress(null),started=false,lastResult='playing',ready=false,returnPause=false;
@@ -90,3 +91,5 @@ document.addEventListener('input',e=>{const input=e.target as HTMLInputElement;i
 import './dialogue.css';
 
 import './battle-layout.css';
+
+import './map-layout.css';

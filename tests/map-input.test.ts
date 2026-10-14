@@ -13,7 +13,7 @@ class ElementStub extends EventTarget {
 function event(type:string,values:Record<string,unknown>={}){const e=new Event(type,{cancelable:true});Object.assign(e,values);return e;}
 test('map input handles two-finger pinch, drag threshold, cancellation and post-gesture click suppression',()=>{
  const art=new ElementStub(),stage=new ElementStub(),dialog=new ElementStub(),windowStub=new EventTarget();
- dialog.querySelector=(s:string)=>s==='.map-art,.geo-map'?art:s==='.mission-stage'?stage:null;
+ dialog.querySelector=(s:string)=>s==='.map-art'?art:s==='.mission-stage'?stage:null;
  const old={document:globalThis.document,window:globalThis.window,ResizeObserver:globalThis.ResizeObserver};
  Object.assign(globalThis,{document:{createElement:()=>new ElementStub()},window:windowStub,ResizeObserver:class{observe(){}disconnect(){}}});
  try{

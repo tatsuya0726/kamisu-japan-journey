@@ -1,4 +1,3 @@
-import {storyFaces,faceHTML} from './dialogue.ts';
 import {pickStory,EXTRA_STORIES,type CatStory} from './cat-stories.ts';
 export const LANDMARKS=[
  {id:'ikisu',name:'息栖神社',lat:35.8858061,lon:140.6251283,address:'神栖市息栖2882',source:'https://www.city.kamisu.ibaraki.jp/kanko_sports/culture/1002532/1002533.html',background:'ikisu',title:'木陰の風鈴便り',action:'風鈴を届ける',result:'キキとネネが風鈴を届けた。木陰にやさしい音が広がり、猫たちは耳をすませた。'},
@@ -9,19 +8,9 @@ export const LANDMARKS=[
  {id:'arena',name:'かみす防災アリーナ',lat:35.8988744,lon:140.6499851,address:'神栖市木崎1219-7',source:'https://www.kamisu-arena.com/access/',background:'arena',title:'猫のリレー応援',action:'応援旗をそろえる',result:'ネネが色をそろえ、キキが旗を運んだ。猫たちだけの創作リレー大会を元気に応援！'},
  {id:'portpark',name:'港公園',lat:35.91397755742545,lon:140.67161455102993,address:'神栖市東深芝',source:'https://www.city.kamisu.ibaraki.jp/kanko_sports/ss_facility/1002393/1002401/1002403.html',background:'port-park',title:'地上の港さんぽ',action:'木陰から船を眺める',result:'公園の地上でひと休み。キキとネネは港を行く船を数えた。展望塔には入らず、木陰でのんびり。'}
 ];
-export function mercator(lat:number,lon:number,z=13){const size=256*2**z,sin=Math.sin(lat*Math.PI/180);return {x:(lon+180)/360*size,y:(.5-Math.log((1+sin)/(1-sin))/(4*Math.PI))*size};}
-const center=mercator(35.8915,140.6755);
-export const WALK_MAP={zoom:13,width:1200,height:500,left:center.x-600,top:center.y-250};
-export function landmarkPoint(lat:number,lon:number){const p=mercator(lat,lon);return {x:(p.x-WALK_MAP.left)/12,y:(p.y-WALK_MAP.top)/5};}
 let selected=0,completed=false;let activeStory:CatStory=LANDMARKS[0];const visited=new Set<number>();
 export function selectLandmark(i:number){if(Number.isInteger(i)&&LANDMARKS[i]){selected=i;completed=false;const place=LANDMARKS[i];activeStory=pickStory('place:'+place.id,[place,...EXTRA_STORIES[place.id]]);}}
 export function anotherVisit(){selectLandmark(selected);}
-/** Strategy-map stage index (港・海岸・まち) -> the landmark whose Kiki & Nene walk story is shown there. */
-export const STAGE_LANDMARKS=[6,3,4] as const;
 export const storyCount=(i:number)=>1+(EXTRA_STORIES[LANDMARKS[i].id]?.length??0);
 export function visitState(){return {index:selected,place:LANDMARKS[selected],story:activeStory,completed,more:storyCount(selected)>1};}
 export function finishVisit(){if(!completed){completed=true;visited.add(selected);}}
-export function walkMenu(detail:boolean){const place=LANDMARKS[selected];if(detail)return `<div class="menu-heading"><span class="eyebrow">KIKI & NENE / まち歩き</span><h2>${place.name}</h2></div><div class="visit-scene" style="background-image:url('${import.meta.env.BASE_URL}defense/runtime/${place.background}.jpg')"><section class="visit-story"><small>猫たちの創作イベント</small><h3>${activeStory.title}</h3>${completed?`<p role="status">${activeStory.result}</p>`:`<p>キキとネネと、ひと休みのお手伝い。</p><button data-visit-event class="primary">${activeStory.action}</button>`}<small>場所をモチーフにした創作です。実際の催事ではありません。</small><a href="${place.source}" target="_blank" rel="noopener">所在地の公式情報</a></section><div class="visit-expressions" aria-label="会話の表情">${storyFaces(activeStory.title,completed).map(face=>faceHTML(face,import.meta.env.BASE_URL)).join('')}</div></div><nav class="menu-nav"><button data-walk>閉じてまち歩き地図へ</button>${completed&&storyCount(selected)>1?'<button data-another-visit>もうひとつのお話</button>':''}<small>${place.address}</small></nav>`;
- const m=WALK_MAP;let tiles='';for(let y=Math.floor(m.top/256);y<=Math.floor((m.top+m.height)/256);y++)for(let x=Math.floor(m.left/256);x<=Math.floor((m.left+m.width)/256);x++)tiles+=`<img alt="" class="geo-tile" style="left:${(x*256-m.left)/12}%;top:${(y*256-m.top)/5}%;width:21.3333333333%;height:51.2%" src="https://cyberjapandata.gsi.go.jp/xyz/pale/${m.zoom}/${x}/${y}.png">`;
- return `<div class="map-heading"><div class="menu-heading"><span class="eyebrow">KAMISU / 公開所在地の地図</span><h2>キキとネネのまち歩き</h2></div><button data-map>防衛作戦へ</button></div><div class="mission-stage"><div class="geo-map"><div class="geo-tiles">${tiles}</div>${LANDMARKS.map((l,i)=>{const p=landmarkPoint(l.lat,l.lon);return `<i aria-hidden="true" class="geo-anchor" style="left:${p.x}%;top:${p.y}%"></i><button data-landmark="${i}" class="mission-point geo-point geo-${l.id} ${visited.has(i)?'cleared':''}" style="left:${p.x}%;top:${p.y}%" aria-label="${l.name}のイベント"><b>${visited.has(i)?'✓':i+1}</b><span>${l.name}</span></button>`;}).join('')}<a class="geo-credit" href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noopener">地理院タイル / 国土地理院</a></div></div><nav class="menu-nav"><button data-home>タイトルへ</button><small>施設の公開座標に配置 / 北が上<br>地図の表示には通信が必要です</small></nav>`;
-}

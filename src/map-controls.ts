@@ -4,7 +4,7 @@ let dispose=()=>{};
 /** Attach only to the map surface: floating panels never participate in gestures. */
 export function mountMap(dialog:HTMLDialogElement){
  dispose();dispose=()=>{};
- const art=dialog.querySelector<HTMLElement>('.map-art,.geo-map');
+ const art=dialog.querySelector<HTMLElement>('.map-art');
  const stage=dialog.querySelector<HTMLElement>('.mission-stage');
  if(!art||!stage)return;
  const geographic=art.classList.contains('geo-map'),key=geographic?'walk':'operation';

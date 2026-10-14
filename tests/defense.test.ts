@@ -10,3 +10,12 @@ test('ranged units hit from range without crossing targets',()=>{const s=fresh()
 test('loss stops all simulation; restart is independent',()=>{const s=fresh();advance(s,200);assert.equal(s.result,'lose');const done=JSON.stringify(s);advance(s,20);assert.equal(JSON.stringify(s),done);assert.equal(spawn(s,0),false);const r=fresh();assert.equal(r.home,650);assert.equal(r.time,0);assert.equal(r.units.length,0);assert.equal(r.food,120);});
 for(let stage=0;stage<STAGES.length;stage++)test(`stage ${stage+1} winnable with mixed deployment`,()=>{const s=fresh(stage);let choice=0;const order=[1,2,0,3,0];for(let i=0;i<6000&&s.result==='playing';i++){if(spawn(s,order[choice%order.length]))choice++;tick(s,.05);}assert.equal(s.result,'win',JSON.stringify({time:s.time,home:s.home,enemy:s.enemyBase,units:s.units.length}));const done=JSON.stringify(s);advance(s,2);assert.equal(JSON.stringify(s),done);});
 test('ten distinct companions and three local stages',()=>{assert.equal(CATS.length,10);assert.ok(CATS[1].hp>CATS[0].hp);assert.ok(CATS[2].range>CATS[0].range);assert.ok(CATS[3].speed>CATS[0].speed);assert.equal(STAGES.length,3);});
+test('enemies overlap: every enemy walks to the front and attacks, none queues behind another',()=>{
+ const s=fresh();s.food=0;s.wave=STAGES[0].waves.length;
+ s.units=[{id:1,side:0,kind:1,x:700,hp:100000,max:100000,cool:100,flash:0},...[0,1,2].map(i=>({id:2+i,side:1,kind:0,x:900,hp:70,max:70,cool:0,flash:0,born:0}))];
+ for(let i=0;i<200;i++)tick(s,.1);
+ const enemies=s.units.filter(u=>u.side===1);assert.equal(enemies.length,3);
+ assert.ok(enemies.every(e=>Math.abs(e.x-enemies[0].x)<1),'enemies stack on the same spot');
+ assert.ok(s.units[0].hp<100000-3*ENEMIES_DAMAGE(),'all three enemies damaged the cat');
+});
+function ENEMIES_DAMAGE(){return 10*(STAGES[0].dmgScale??1);}

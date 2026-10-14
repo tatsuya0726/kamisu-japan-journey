@@ -37,9 +37,9 @@ export const ENEMIES=[
  {name:'スーツの親分',hp:310,damage:25,range:42,speed:18,attack:1.5},...EXTRA_ENEMIES
 ];
 export const STAGES=[
- {name:'鹿島港・神栖側',subtitle:'潮風の防衛線',note:'神栖市の北部から東部には鹿島港が広がります。',theme:'port',base:520,income:12,hpScale:2.5,dmgScale:2,waves:[[5,0],[13,0],[22,0],[30,1],[40,0],[48,0],[57,2],[68,1]]},
- {name:'波崎海岸',subtitle:'潮風とねこの作戦',note:'波崎海水浴場は、神栖市波崎にある遠浅の海水浴場です。',theme:'coast',base:700,income:13,hpScale:3.2,dmgScale:2.4,waves:[[4,0],[10,0],[17,1],[24,0],[29,2],[37,1],[45,0],[50,2],[60,1],[70,2]]},
- {name:'大野原のまち',subtitle:'みんなの帰る場所',note:'大野原は、神栖市の商業の核となる地区の一つです。',theme:'town',base:900,income:14,hpScale:3.4,dmgScale:2.6,waves:[[4,0],[9,1],[17,0],[23,2],[29,1],[36,2],[43,0],[49,1],[57,2],[66,1],[72,2],[80,2]]}
+ {name:'鹿島港・神栖側',subtitle:'潮風の防衛線',note:'神栖市の北部から東部には鹿島港が広がります。',theme:'port',base:520,income:15,hpScale:1.3,dmgScale:1.2,waves:[[5,0],[13,0],[22,0],[30,1],[40,0],[48,0],[57,2],[68,1]]},
+ {name:'波崎海岸',subtitle:'潮風とねこの作戦',note:'波崎海水浴場は、神栖市波崎にある遠浅の海水浴場です。',theme:'coast',base:700,income:16,hpScale:1.6,dmgScale:1.4,waves:[[4,0],[10,0],[17,1],[24,0],[29,2],[37,1],[45,0],[50,2],[60,1],[70,2]]},
+ {name:'大野原のまち',subtitle:'みんなの帰る場所',note:'大野原は、神栖市の商業の核となる地区の一つです。',theme:'town',base:900,income:17,hpScale:1.9,dmgScale:1.6,waves:[[4,0],[9,1],[17,0],[23,2],[29,1],[36,2],[43,0],[49,1],[57,2],[66,1],[72,2],[80,2]]}
 ];
 export type Unit={id:number,side:0|1,kind:number,x:number,hp:number,max:number,cool:number,flash:number;born?:number;slowUntil?:number};
 export type Battle={stage:number,time:number,food:number,home:number,enemyBase:number,units:Unit[],cooldowns:number[],wave:number,nextId:number,paused:boolean,speed:1|2,result:'playing'|'win'|'lose',kills:number;mission?:MissionStage;settled?:Record<number,number>;triggers?:number[]};
@@ -54,7 +54,7 @@ function step(s:Battle,dt:number){const stage=battleStage(s);s.time+=dt;s.food=M
  for(const u of s.units){const c=u.side===0?CATS[u.kind]:ENEMIES[u.kind],dir=u.side===0?1:-1;u.cool=Math.max(0,u.cool-dt);u.flash=Math.max(0,u.flash-dt);
  const targets=s.units.filter(v=>v.side!==u.side&&v.hp>0&&(v.x-u.x)*dir>=-2).sort((a,b)=>Math.abs(a.x-u.x)-Math.abs(b.x-u.x));const target=targets[0],baseX=u.side===0?(s.mission?.spawnX??FIELD.enemy):FIELD.home,dist=target?Math.abs(target.x-u.x):Math.abs(baseX-u.x);
  if(dist<=c.range){if(u.cool<=0){const damage=c.damage*(u.side===1?stage.dmgScale??1:1);u.cool=c.attack;u.flash=0.16;if(target){hits.set(target.id,(hits.get(target.id)??0)+damage);if(u.side===1&&extraEnemy(u.kind)?.id==='bubble_fish')target.slowUntil=s.time+1.4;}else if(u.side===0)enemyHit+=damage;else homeHit+=damage;}}
- else {let movement=Math.min(c.speed*dt*speedFactor(s,u),Math.max(0,dist-c.range));if(u.side===1){const front=s.units.filter(v=>v.side===1&&(v.x-u.x)*dir>0.01).sort((a,b)=>Math.abs(a.x-u.x)-Math.abs(b.x-u.x))[0];if(front)movement=Math.min(movement,Math.max(0,Math.abs(front.x-u.x)-48));}u.x+=dir*movement;}
+ else {let movement=Math.min(c.speed*dt*speedFactor(s,u),Math.max(0,dist-c.range));u.x+=dir*movement;}
  }
  for(const u of s.units){const hit=hits.get(u.id)??0;const armored=u.side===1&&extraEnemy(u.kind)?.id==='can_robot'&&(s.time-(u.born??0))%6>4;u.hp-=hit*(armored?.65:1);if(hit>0&&u.side===1&&extraEnemy(u.kind)?.id==='buzz_bee')u.x=Math.min(stage.spawnX??FIELD.enemySpawn,u.x+12);if(u.hp<=0&&u.side===1&&s.settled)s.settled[u.kind]=(s.settled[u.kind]??0)+1;}s.kills+=s.units.filter(u=>u.hp<=0&&u.side===1).length;s.units=s.units.filter(u=>u.hp>0);s.home=Math.max(0,s.home-homeHit);s.enemyBase=Math.max(0,s.enemyBase-enemyHit);if(s.home<=0)s.result='lose';else if(!s.mission&&s.enemyBase<=0)s.result='win';else if(s.mission)resolveMission(s);
 }

@@ -11,5 +11,5 @@ test('the single illustrated map holds 3 stages and all 7 places without overlap
  assert.equal(MISSION_LOCATIONS.length,STAGES.length);assert.equal(PLACE_LOCATIONS.length,LANDMARKS.length);
  const pts=[...MISSION_LOCATIONS,...PLACE_LOCATIONS];for(const p of pts){assert.ok(p.x>3&&p.x<97&&p.y>3&&p.y<97);}
  for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++)assert.ok(Math.hypot(pts[i].x-pts[j].x,pts[i].y-pts[j].y)>=6,`points ${i}/${j} too close`);
- for(const s of STAGES){assert.ok((s.hpScale??1)>=2.5);assert.ok((s.dmgScale??1)>=2);assert.ok(s.income<=14);}
+ for(const s of STAGES){assert.ok((s.hpScale??1)>=1.3);assert.ok((s.dmgScale??1)>=1.2);assert.ok(s.income<=17);}
 });

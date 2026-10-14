@@ -22,7 +22,9 @@ export const CAT_TIPS = [
  '木剣を持ったキキ。少し長い間合いから、強い一撃。',
  'おさかなを運ぶキキ。いちばん速く進み、素早く応援する。',
  '翼をつけたネネ。遠くから応援するが、敵の攻撃は受ける。',
- 'もこもこガードのネネ。ごはんは多く必要だが、長く前線を支える。'
+ 'もこもこガードのネネ。ごはんは多く必要だが、長く前線を支える。',
+ 'ローラーを持った応援役。いちばん遠くまで届くが、次の攻撃には時間がかかる。',
+ '道着姿の前衛。間合いは短いが、すばやい連続攻撃が得意。'
 ];
 
-export const CAT_SPRITES = ['cream','silver','farmer','courier','kiki-sword','kiki-fish','nene-wings','nene-guard'];
+export const CAT_SPRITES = ['cream','silver','farmer','courier','kiki-sword','kiki-fish','nene-wings','nene-guard','artist','karate'];

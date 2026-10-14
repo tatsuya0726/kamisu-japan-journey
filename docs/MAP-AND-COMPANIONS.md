@@ -53,3 +53,13 @@ Kiki and Nene have 11 short exchanges: four deployment lines, four victory lines
 Each deck excludes its previous index. The index persists locally under `kamisu.stories.last.v1`, so a page reload does not immediately repeat the last entry when storage is available. All content is bundled text, with no OAuth, AI model, paid API, new server or external dialogue transmission. Stories explicitly describe fictional cats; no real staff, pupils or incidents are invented. Port Park stories stay on the ground and never invite entry into the observation tower.
 
 Validation: 40 tests passed and the production build passed. Chrome at 667×375 showed four consecutive visits without adjacent duplicates and no scroll/clipped buttons. Reload changed the last “葉っぱのしおり” to “小さな休憩便”. Deployment dialogue appeared with the modal closed and combat controls still available.
+## Ten-cat roster
+
+Two existing supplied companions were added without image generation or source-image edits:
+
+| Cat | Cost | Range | Deployment cooldown | Attack interval | HP | Source |
+|---|---:|---:|---:|---:|---:|---|
+| 絵描き猫 | 130 | 225 | 9s | 2.1s | 90 | `kamisu-player-artist-cat-static-v2.png`, Drive `1_2u2ZeAh4zezJIMmGrakn3zalGiwuE27` |
+| 空手猫 | 85 | 34 | 4.5s | 0.45s | 165 | `kamisu-player-karate-cat-static-v1.png`, Drive `1fMbNn488gbH0_i-cOz5Gx161UhV34KDA` |
+
+Artist has the longest range with a slower attack; karate trades short range for quick attacks. Artist's transparent source margins are accounted for with runtime scale/origin and card display scale. All ten cards use the existing independent horizontal strip. Keyboard 1–9 and 0 deploys slots 1–10. Existing cooldowns, cap24, overlap, base targeting and saves are unchanged. The 40 tests pass with all ten roles included in stacked damage, cost and base-range checks.

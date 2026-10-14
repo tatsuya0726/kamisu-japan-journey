@@ -64,5 +64,17 @@
     "runtime": "nene-guard.png",
     "bytes": 1665943,
     "sha256": "cf6f1a2b701ac5a308c2f0d850f52f28ee88c2cd47eb4966b4cda86113d48eda"
+  },
+  {
+    "source": "kamisu-player-artist-cat-static-v2.png",
+    "runtime": "artist.png",
+    "bytes": 585080,
+    "sha256": "fecec906063ca0d208960c5a210c7f92ba2b44327acf789d22a72d923c529d6a"
+  },
+  {
+    "source": "kamisu-player-karate-cat-static-v1.png",
+    "runtime": "karate.png",
+    "bytes": 880853,
+    "sha256": "b7e999a23b5203c56c1ac41fb3b870ec5edc77509a4888843939efca6bc79b31"
   }
 ]

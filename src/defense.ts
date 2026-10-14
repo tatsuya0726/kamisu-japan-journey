@@ -8,7 +8,9 @@ export const CATS=[
  {name:'木剣キキ',role:'近接',cost:110,cd:7,hp:180,damage:38,range:48,speed:36,attack:1.1},
  {name:'おさかなキキ',role:'快速',cost:90,cd:5,hp:95,damage:19,range:38,speed:95,attack:0.55},
  {name:'翼ネネ',role:'空から応援',cost:170,cd:10,hp:125,damage:42,range:200,speed:34,attack:1.9},
- {name:'ガードネネ',role:'重装',cost:240,cd:18,hp:1000,damage:16,range:38,speed:18,attack:1.4}
+ {name:'ガードネネ',role:'重装',cost:240,cd:18,hp:1000,damage:16,range:38,speed:18,attack:1.4},
+ {name:'絵描き猫',role:'長距離応援',cost:130,cd:9,hp:90,damage:28,range:225,speed:25,attack:2.1},
+ {name:'空手猫',role:'素早い近接',cost:85,cd:4.5,hp:165,damage:14,range:34,speed:55,attack:.45}
 ];
 export const ENEMIES=[
  {name:'いたずらチンピラ',hp:70,damage:10,range:38,speed:29,attack:1.2},
